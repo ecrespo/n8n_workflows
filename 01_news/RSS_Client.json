@@ -1,0 +1,175 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "additionalOptions": {
+          "categoryId": 1,
+          "limit": 200,
+          "order": "published_at",
+          "direction": "asc",
+          "plainText": true,
+          "status": "unread"
+        }
+      },
+      "type": "n8n-nodes-miniflux.Miniflux",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -120
+      ],
+      "id": "f29e42a5-649f-4e6d-bef9-19cfba225149",
+      "name": "Miniflux",
+      "credentials": {
+        "minifluxApi": {
+          "id": "lcl6IGeOv0iWtmL4",
+          "name": "Miniflux account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "377a91ce-4331-4ed0-a7be-cf9ecde73a1b",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "9bf86f3e-826b-4764-a1db-c963715c14d7",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "4b146dec-074a-498a-8efe-dd6930e2d108",
+              "name": "author",
+              "value": "={{ $json.author }}",
+              "type": "string"
+            },
+            {
+              "id": "d8c9abd1-fee9-4498-8402-34f8837f1ff1",
+              "name": "content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "269ab7da-96d7-4991-9289-fb5cd879106e",
+              "name": "content_plain",
+              "value": "={{ $json.content_plain }}",
+              "type": "string"
+            },
+            {
+              "id": "a9f7c8e3-23a6-422d-a367-b94a5b06784a",
+              "name": "publishedAt",
+              "value": "={{ $json.published_at }}",
+              "type": "string"
+            },
+            {
+              "id": "2a1ee10e-8569-460f-9205-b6258e8699a3",
+              "name": "isoDate",
+              "value": "={{ new Date($json.published_at).getTime() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -340,
+        -120
+      ],
+      "id": "26afbe02-c045-4384-a9a4-3e01e92ecf87",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d97a1197-82a9-4615-bde4-428fe5a9afc7",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ Date.now() - 7*24*60*60*1000 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -140,
+        -120
+      ],
+      "id": "6464fb6e-d09e-45ac-8511-c9a698aa15a8",
+      "name": "Filter by Date"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -820,
+        -120
+      ],
+      "id": "16100492-cd2a-4955-8aea-1920dbb89663",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "connections": {
+    "Miniflux": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter by Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Miniflux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ee1cf731afadd4ff2eb0ec2fd8cdd7bc4d564a7e22825b38dec3d20f1befef"
+  }
+}
