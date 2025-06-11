@@ -5,8 +5,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -540,
-        -120
+        -740,
+        -20
       ],
       "id": "c395bb8a-aa43-4139-8aee-bb915cf0d36b",
       "name": "When clicking ‘Execute workflow’"
@@ -16,14 +16,14 @@
         "promptType": "define",
         "text": "Se requiere obtener todas las noticias de la última semana",
         "options": {
-          "systemMessage": "Actua como un agente que consulta la herramienta Tool_get_news para obtener las noticias, la estructura de la siguiente forma en formato markdown:\n\n# Title\n\nContent\n\nURL\n\nAuthor\n\npublishAt"
+          "systemMessage": "=Obten todas los articulos de noticias publicados en Tool_get_news. \nEstrutura cada noticia con el title, luego con content, el url y publishedAt en formato markdown para prepararlo como un mensaje que va a ser enviado a Telegram el mensaje colocalo entre comillas invertidas ```[mensaje]```.\n\n\n\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        -100,
-        -120
+        -400,
+        -20
       ],
       "id": "5ab8e6e3-1634-4751-93d4-e965ed436ec6",
       "name": "AI Agent"
@@ -40,8 +40,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -300,
-        160
+        -520,
+        200
       ],
       "id": "596ef3a5-584f-4102-a947-e3c12dbe805f",
       "name": "OpenAI Chat Model",
@@ -72,11 +72,33 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        200,
-        140
+        -220,
+        280
       ],
       "id": "565ce71c-edd9-4f3c-a009-e598266ddbaf",
       "name": "Tool_get_news"
+    },
+    {
+      "parameters": {
+        "chatId": "4277807",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "f395c5a4-aaa3-47e9-bc2a-cbe8dae82c09",
+      "name": "Telegram",
+      "webhookId": "1a258b09-3cae-4787-982d-3f00a5b144b7",
+      "credentials": {
+        "telegramApi": {
+          "id": "pBOX6KZDQbH782d8",
+          "name": "Telegram account  ChatbotAssitant"
+        }
+      }
     }
   ],
   "connections": {
@@ -85,6 +107,17 @@
         [
           {
             "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
             "type": "main",
             "index": 0
           }
