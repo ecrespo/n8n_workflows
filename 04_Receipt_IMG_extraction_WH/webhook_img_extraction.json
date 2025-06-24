@@ -1,0 +1,155 @@
+{
+  "name": "AgenteOCR",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "1097ad44-d6ff-4641-8901-c592c60fc222",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "65da9a71-385d-42ee-8d98-ff11dd1ba9a0",
+      "name": "Webhook",
+      "webhookId": "1097ad44-d6ff-4641-8901-c592c60fc222"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "What's in this image?\n\nI need it to separate all the things that were bought, the total amount, the place of purchase and how the payment was made.",
+        "inputType": "base64",
+        "binaryPropertyName": "receipt_image",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        220,
+        0
+      ],
+      "id": "4b0d6499-a65f-4186-9f91-13ab712c94f6",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mlOEFPy96Snlfc7T",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Here is the content from a receipt:\n\n {{ $json.content }}\n\n{\n\"place_of_purchase\": <place of purchase>,\n\"items_and_price\": list of items and prices,\n\"address\": the address,\n\"method_of_payment\": <method of payment>\n}\n\nkeep the json in this format when output."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        440,
+        0
+      ],
+      "id": "f0a5f710-4f13-4953-b7d0-2eba62f5f5dc",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "mlOEFPy96Snlfc7T",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e8c8962-e049-4797-8115-4a20fe3a58a1",
+              "name": "message.content",
+              "value": "={{ $json.message.content }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "c8fb50e6-23a6-49cb-b4df-d60c7729ee63",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e61064a6-ced5-4a27-9b76-06dd59bb9535",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "aQGTPG941aDNMmtZ",
+  "tags": []
+}
