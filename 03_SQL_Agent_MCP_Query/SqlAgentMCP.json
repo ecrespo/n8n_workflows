@@ -1,0 +1,226 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        -140
+      ],
+      "id": "8d91866f-2235-45cc-ad3e-cdcfd9091c90",
+      "name": "When chat message received",
+      "webhookId": "f04c4694-8cf9-4d56-8225-397536263f5c"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -140,
+        40
+      ],
+      "id": "82348175-c236-43da-b123-b51d35e6309b",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an intelligent AI agent connected to a PostgreSQL MCP server via 4 nodes:\n\nNodes 1 & 2: List Tools/Resources – Used to discover available tables, views, columns, functions, and procedures.\n\nNodes 3 & 4: Execute Tools/Resources – Used to run SQL queries, invoke procedures, or retrieve data.\n\n🎯 Purpose:\nYour job is to fulfill user requests by querying or modifying data via SQL using the tools/resources exposed by the system.\n\n🧩 Core Workflow:\nParse Intent: Understand the user request clearly. Identify if it requires data retrieval, modification, or execution of a specific tool/procedure.\n\nVerify Resource Availability:\n\nUse Nodes 1 & 2 to confirm which tools/resources exist (e.g., check if a table, procedure, or function is available before using it).\n\nCross-reference user request with available resources before execution.\n\nGenerate SQL: Formulate a precise, efficient, and safe SQL query using confirmed tools/resources.\n\nExecute:\n\nUse Nodes 3 & 4 to execute your query.\n\nIf execution fails, DO NOT GUESS blindly.\n\nFallback Logic on Failure:\n\nIf an execution fails due to missing table/function/resource, or syntax error:\n\nImmediately re-check tools/resources using Nodes 1 & 2.\n\nAdjust your query based on updated results.\n\nOnly retry execution after verifying that the resource exists and matches the expected usage.\n\nOutput:\n\nReturn concise, structured output from queries.\n\nProvide summaries or sample results for large datasets.\n\nIf unable to proceed, explain what’s missing and suggest actions.\n\n⚠️ Safety Rules:\nDo not perform destructive actions (DELETE, UPDATE) unless explicitly confirmed.\n\nParameterize user inputs where possible to avoid SQL injection or logic errors.\n\nConfirm resource existence before each execution unless it was just checked.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -180,
+        -140
+      ],
+      "id": "0940681a-472b-4a33-a373-5b91925847a6",
+      "name": "PostgreQSL MCP Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "={{  $fromAI('tool_name','selected tool to execute') }}",
+        "toolParameters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tool_Parameters', ``, 'json') }}"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        340,
+        280
+      ],
+      "id": "d1edccec-27a6-4ff9-a9be-b14171957075",
+      "name": "PSQL DB - Execute Tool",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "8fXuHLpD5I51x9p0",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "listResources"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        140,
+        280
+      ],
+      "id": "e5c0e09d-98cf-409d-bf39-2a05115c1d73",
+      "name": "PSQL DB - List Resources",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "8fXuHLpD5I51x9p0",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        280
+      ],
+      "id": "9e08cff3-6073-4667-8c77-6f1e27bcd588",
+      "name": "PSQL DB - List Tools",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "8fXuHLpD5I51x9p0",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "readResource",
+        "resourceUri": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Resource_URI', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        480,
+        280
+      ],
+      "id": "70ef91c2-27bc-4f41-b2bd-f709841b220e",
+      "name": "PSQL DB - Read Resource",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "8fXuHLpD5I51x9p0",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        140
+      ],
+      "id": "679b1307-92e0-4d23-a8f3-d09542445b75",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WmxGMxSci80ewyVX",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PSQL DB - Execute Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PSQL DB - List Resources": {
+      "ai_tool": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PSQL DB - List Tools": {
+      "ai_tool": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PSQL DB - Read Resource": {
+      "ai_tool": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "PostgreQSL MCP Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  }
+}

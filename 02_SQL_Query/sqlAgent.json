@@ -1,0 +1,171 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "biblioteca",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        420
+      ],
+      "id": "a110f1b0-8540-4e84-856e-5ad9ffbe7cd8",
+      "name": "Webhook",
+      "webhookId": "52dc1aca-bb7a-41b6-a703-275c72f24fd5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "options": {
+          "systemMessage": "=Eres un asistente experto en PostgreSQL. Tu objetivo es:\n1. Recibir una pregunta en lenguaje natural sobre los datos de una base de datos de una tienda online de ropa.\n2. Convertirla única y exclusivamente en una instrucción SQL SELECT válida.\n3. No ejecutar nunca INSERT, UPDATE ni DELETE.\n4. Al generar la consulta SELECT, simpere usar la función SIMILARITY para encontrar búsquedas parecidas. En el WHERE usa el operador % para filtrar por similitud.\n5. Usar siempre la herramienta “postgres” para ejecutar la consulta\n6. Tras la ejecución, utiliza los resultados para responder en lenguaje natural.\n   \nA continuación tienes la **estructura completa** de tu base de datos (schema DDL). Úsala para conocer nombres de tablas, columnas y tipos:\n\n```sql\n-- ============================================\n-- Script de creación de tablas para tienda online\n-- ============================================\n\n-- 1. Tabla: clientes\nCREATE TABLE clientes (\n  cliente_id   SERIAL PRIMARY KEY,\n  nombre       VARCHAR(100) NOT NULL,\n  email        VARCHAR(150) UNIQUE NOT NULL,\n  direccion    TEXT,\n  fecha_alta   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()\n);\n\n-- 2. Tabla: productos (con campos extra)\nCREATE TABLE productos (\n  producto_id     SERIAL PRIMARY KEY,\n  nombre          VARCHAR(150) NOT NULL,\n  descripcion     TEXT,\n  sku             VARCHAR(50) UNIQUE NOT NULL,\n  precio_unit     NUMERIC(10,2) NOT NULL CHECK (precio_unit >= 0),\n  stock           INT NOT NULL DEFAULT 0 CHECK (stock >= 0),\n  activo          BOOLEAN NOT NULL DEFAULT TRUE,\n  imagen_url      TEXT,\n  atributos       JSONB NOT NULL DEFAULT '{}'::jsonb,\n  creado_en       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),\n  actualizado_en  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()\n);\n\n-- Función y trigger para mantener actualizado 'actualizado_en'\nCREATE OR REPLACE FUNCTION actualizar_timestamp()\nRETURNS TRIGGER AS $$\nBEGIN\n  NEW.actualizado_en := NOW();\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER trg_productos_update\nBEFORE UPDATE ON productos\nFOR EACH ROW\nEXECUTE FUNCTION actualizar_timestamp();\n\n-- 3. Tabla: pedidos\nCREATE TABLE pedidos (\n  pedido_id    SERIAL PRIMARY KEY,\n  cliente_id   INT NOT NULL\n                REFERENCES clientes(cliente_id)\n                ON DELETE RESTRICT,\n  fecha_pedido TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),\n  estado       VARCHAR(20) NOT NULL\n                CHECK (estado IN ('pendiente','procesando','enviado','cancelado')),\n  total        NUMERIC(10,2) NOT NULL DEFAULT 0\n);\n\n-- 4. Tabla: pedido_items (relación N–M)\nCREATE TABLE pedido_items (\n  pedido_id    INT NOT NULL\n                REFERENCES pedidos(pedido_id)\n                ON DELETE CASCADE,\n  producto_id  INT NOT NULL\n                REFERENCES productos(producto_id)\n                ON DELETE RESTRICT,\n  cantidad     INT NOT NULL CHECK (cantidad > 0),\n  precio_unit  NUMERIC(10,2) NOT NULL CHECK (precio_unit >= 0),\n  PRIMARY KEY (pedido_id, producto_id)\n);\n\n\nEjemplos de registros de la tabla de Productos:\n\n\nproducto_id,nombre,descripcion,sku,precio_unit,stock,activo,imagen_url,atributos,creado_en,actualizado_en\n1,Camiseta slim fit de algodón blanco,El camiseta blanco en estilo slim fit está confeccionado en algodón de alta calidad. Perfecto para tus looks más casuales.,SKU000001,79.53,27,true,https://cdn.ejemplo.com/images/1.jpg,\"{\"\"color\"\": \"\"negro\"\", \"\"talla\"\": \"\"XXL\"\"}\",2025-05-24 15:31:39.959481+00,2025-05-24 15:31:39.959481+00\n2,Pantalón oversize de lino negro,El pantalón negro en estilo oversize está confeccionado en lino de alta calidad. Perfecto para tus looks más casuales.,SKU000002,42.84,35,true,https://cdn.ejemplo.com/images/2.jpg,\"{\"\"color\"\": \"\"blanco\"\", \"\"talla\"\": \"\"XL\"\"}\",2025-05-24 15:31:39.959481+00,2025-05-24 15:31:39.959481+00\n3,Chaqueta cropped de cuero azul marino,El chaqueta azul marino en estilo cropped está confeccionado en cuero de alta calidad. Perfecto para tus looks más casuales.,SKU000003,46.47,198,true,https://cdn.ejemplo.com/images/3.jpg,\"{\"\"color\"\": \"\"negro\"\", \"\"talla\"\": \"\"XL\"\"}\",2025-05-24 15:31:39.959481+00,2025-05-24 15:31:39.959481+00\n\n\nEjemplo1:\n\nEntrada: estoy buscando camisetas slim\nconsulta sql: SELECT\n  producto_id,\n  nombre,\n  descripcion,\n  similarity(nombre, 'camiseta slim') AS sim\nFROM productos\nWHERE nombre % 'camiseta slim'\nORDER BY sim DESC\nLIMIT 10;\n\nEjemplo2: quiero ver el estado del pedido de Maria Morillo\nconsulta sql: SELECT\n  p.pedido_id,\n  p.estado,\n  p.fecha_pedido,\n  c.nombre,\n  similarity(c.nombre, 'Maria Morillo') AS sim_nombre\nFROM clientes c\nJOIN pedidos p\n  ON p.cliente_id = c.cliente_id\nWHERE c.nombre % 'Maria Morillo'\nORDER BY sim_nombre DESC;\n\n\n\n# Recordatorio:\nNUNCA respondas con una consulta SELECT ni nada de sql. El SQL solo lo generas para enviarlo tu herramienta \"postgres\" pero NUNCA en tu respuesta.",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        60,
+        420
+      ],
+      "id": "dc5125cf-2182-4c7b-b920-a3bf27f558e1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{$fromAI('query')}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        440,
+        740
+      ],
+      "id": "7dd9dfac-04be-4353-805c-29912c74fc1a",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "GrwBCKyrLrdb7yRV",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        700
+      ],
+      "id": "9c210205-22b2-41a4-a964-4c742ca51170",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WmxGMxSci80ewyVX",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        420
+      ],
+      "id": "a3d5fa65-0a8d-49f7-897b-93ed79c42241",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        700
+      ],
+      "id": "7e5bce71-929d-488d-9f36-8e60f65be6c5",
+      "name": "Simple Memory"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  }
+}
