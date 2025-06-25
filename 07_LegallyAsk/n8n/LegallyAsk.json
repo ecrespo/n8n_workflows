@@ -1,0 +1,251 @@
+{
+  "name": "LegalAgent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "338b86b2-9277-44e7-9f84-1020734793ee",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1480,
+        -340
+      ],
+      "id": "79ce0d0e-2a57-457b-93f7-ca7300108547",
+      "name": "Webhook",
+      "webhookId": "338b86b2-9277-44e7-9f84-1020734793ee"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini-search-preview-2025-03-11",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI-SEARCH-PREVIEW-2025-03-11"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=My question:{{ $json.question }}\n\nMy country:{{ $json.country }}\n\nSearch the web and give me an answer to my question for that specific country. Also, give me a link to your source for this answer. \n\nMake sure you only give official goverment websites and nothing else as your source. \n\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1060,
+        -340
+      ],
+      "id": "444131ac-e95c-4aea-9caf-c97b0a4be323",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mlOEFPy96Snlfc7T",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b56a780-ce08-4c4c-93e3-4b8c6e738b38",
+              "name": "question",
+              "value": "={{ $json.body.legalQuestion }}",
+              "type": "string"
+            },
+            {
+              "id": "e8a1a95b-a02b-40a6-bd1c-21d896362138",
+              "name": "country",
+              "value": "Venezuela",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1260,
+        -340
+      ],
+      "id": "8f4f6839-7a8a-45d4-ab7c-83f97609a43c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer fc-b389caedad534ffe836163dfc8a898b2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.message.annotations[0].url_citation.url }}\",\n  \"formats\": [\n    \"json\"\n  ],\n  \"jsonOptions\": {\n    \"schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"{{ $('Webhook').item.json.body.legalQuestion }}\": {\n          \"type\": \"string\"\n        },\n        \"supports_sso\": {\n          \"type\": \"boolean\"\n        },\n        \"is_open_source\": {\n          \"type\": \"boolean\"\n        },\n        \"is_in_yc\": {\n          \"type\": \"boolean\"\n        }\n      },\n      \"required\": [\n        \"company_mission\",\n        \"supports_sso\",\n        \"is_open_source\",\n        \"is_in_yc\"\n      ]\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -680,
+        -340
+      ],
+      "id": "e0ca1cfc-e75d-4c72-8bf0-84201f817e8c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "text": "=My question is this: {{ $('Webhook').item.json.body.legalQuestion }}\n\n\nThe answer is inside this: {{ $json.data.json['Puedes decirme de cuanto es la multa por no entregar a tiempo una declaración sucesoral?'] }}\n\nExtract the answer to my question and only that. ",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Answer",
+              "description": "Extract the answer to my question"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        -340
+      ],
+      "id": "b5e97d5c-530d-419f-8a8d-28b75ff1649b",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -460,
+        -100
+      ],
+      "id": "c131fb07-3760-40db-a37c-80a1dfb0e71c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mlOEFPy96Snlfc7T",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output.Answer }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -60,
+        -340
+      ],
+      "id": "32b6532f-2c30-4ab7-9150-2680964e53f4",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "59d83493-63c3-4cc3-a966-c5856bf9ff70",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "r9x11Y5cDj57a0Pv",
+  "tags": []
+}

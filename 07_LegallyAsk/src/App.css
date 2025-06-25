@@ -1,0 +1,91 @@
+/* Global Styles */
+:root {
+  --primary-color: #8a2be2; /* Vibrant purple */
+  --primary-light: #a64dff;
+  --primary-dark: #6a1cb7;
+  --dark-bg: #121212;
+  --dark-surface: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --error-color: #ff5252;
+  --success-color: #4caf50;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.app-wrapper {
+  background-color: var(--dark-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Header Styles */
+header {
+  background-color: var(--primary-color);
+  padding: 30px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Main Content Styles */
+main {
+  padding: 30px;
+}
+
+/* Footer Styles */
+footer {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background-color: var(--dark-bg);
+  border-top: 1px solid #333;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  header {
+    padding: 20px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  main {
+    padding: 20px;
+  }
+}
