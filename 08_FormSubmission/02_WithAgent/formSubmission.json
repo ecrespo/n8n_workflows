@@ -1,0 +1,761 @@
+{
+  "name": "Form Submission Workflow copy",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact us ",
+        "formDescription": "Please fill out the form below and we'll get back to you shortly ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Emal address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Issue Type",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Technical Issues"
+                  },
+                  {
+                    "option": "Billing & Payments"
+                  },
+                  {
+                    "option": "Collaboration &  Partnerships"
+                  },
+                  {
+                    "option": "General Inquiry"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -1460,
+        -340
+      ],
+      "id": "5e181c9d-47f5-4736-9a57-88a93423882e",
+      "name": "On form submission",
+      "webhookId": "85b417d3-c83a-4aee-82d6-49d6116bee77"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY",
+          "mode": "list",
+          "cachedResultName": "n8n_tutorial",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submittedAt": "={{ $json.formattedDate }}",
+            "Name ": "={{ $('On form submission').item.json['Name '] }}",
+            "Message": "={{ $('On form submission').item.json.Message }}",
+            "formMode": "={{ $('On form submission').item.json.formMode }}",
+            "Issue Type": "={{ $('On form submission').item.json['Issue Type'] }}",
+            "Emal address": "={{ $('On form submission').item.json['Emal address'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Issue Type",
+              "displayName": "Issue Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emal address",
+              "displayName": "Emal address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "formMode",
+              "displayName": "formMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        340,
+        -260
+      ],
+      "id": "d3c4e9e9-7b10-40b9-a0ba-1f86803fe290",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nKJquAwaV6978rCY",
+          "name": "Google Auth Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('On form submission').item.json.submittedAt }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -1260,
+        -340
+      ],
+      "id": "830a7057-b30f-4273-bd44-fbb6a70bc2a8",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Issue Type'] }}",
+                    "rightValue": "Technical Issues",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "520e5e0d-bdfb-4bbe-86b8-a650247b1377"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "523fa2ed-0f5b-44a3-a60a-df96ccb60136",
+                    "leftValue": "={{ $json['Issue Type'] }}",
+                    "rightValue": "Technical Issues",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        600,
+        -260
+      ],
+      "id": "cad83f2c-b097-4703-a650-89d57a7379ac",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "ecrespo@gmail.com",
+        "subject": "=Technical support: {{ $json['Emal address'] }}",
+        "emailType": "text",
+        "message": "=Full name: {{ $json['Name '] }}\n\nEmail Address: {{ $json['Emal address'] }}\n\nIssue Type: {{ $json['Issue Type'] }}\n\nMessage:\n{{ $json.Message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        920,
+        -520
+      ],
+      "id": "028a4662-20e0-4967-a6b5-451f1bb1e980",
+      "name": "Send a message Tech",
+      "webhookId": "9c15cafa-7612-4118-bb4d-a6b1eeee3627",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "77xbDPkBHJIZC89K",
+          "name": "Gmail account Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ecrespo@gmail.com",
+        "subject": "={{ $json['Issue Type'] }}: {{ $json['Emal address'] }}",
+        "emailType": "text",
+        "message": "=Full name: {{ $json['Name '] }}\n\nEmail Address: {{ $json['Emal address'] }}\n\nIssue Type: {{ $json['Issue Type'] }}\n\nMessage:\n{{ $json.Message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        900,
+        -80
+      ],
+      "id": "f4451d41-ab68-4f38-9a2c-ebbd2c2b1202",
+      "name": "Send a message NonTech",
+      "webhookId": "03b0b479-7053-4adb-9c44-8f7a0b410ad9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "77xbDPkBHJIZC89K",
+          "name": "Gmail account Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Determine if the following messsage is a spam submission or not.\n\nRespond in the following JSON format (with true or false for the spam_rating):\n{\n  \"spam_rating\": true\n}\n\nHere is the message: \n{{ $('On form submission').item.json.Message }}\n\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1180,
+        -140
+      ],
+      "id": "d928e32b-bd1d-4618-82e8-2effa6ff3315",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mlOEFPy96Snlfc7T",
+          "name": "OpenAi account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2852132b-b637-4137-8d89-1e593e461631",
+              "leftValue": "={{ $('Basic LLM Chain').item.json.output.spam_rating }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        -280
+      ],
+      "id": "f5dc4474-0bd2-44c8-a42c-16663b3e88e1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xDnw9x--7JBoZ_LPjJYNDtThmPQNsaxEJ4gjRwYN770",
+          "mode": "list",
+          "cachedResultName": "n8n_tutorial_spam",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xDnw9x--7JBoZ_LPjJYNDtThmPQNsaxEJ4gjRwYN770/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submittedAt": "={{ $('Date & Time').item.json.formattedDate }}",
+            "Name ": "={{ $('On form submission').item.json['Name '] }}",
+            "Message": "={{ $('On form submission').item.json.Message }}",
+            "formMode": "={{ $('On form submission').item.json.formMode }}",
+            "Issue Type": "={{ $('On form submission').item.json['Issue Type'] }}",
+            "Emal address": "={{ $('On form submission').item.json['Emal address'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Issue Type",
+              "displayName": "Issue Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emal address",
+              "displayName": "Emal address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "formMode",
+              "displayName": "formMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        400,
+        -620
+      ],
+      "id": "2ecc97bc-af78-4ff1-8a52-be20b70e45ac",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nKJquAwaV6978rCY",
+          "name": "Google Auth Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "03739b36-6007-4ca2-aaf8-d9bddd8fd826",
+              "leftValue": "={{ $('On form submission').item.json.Message }}",
+              "rightValue": "\\b(gratis|dinero fácil|haz clic aquí|oferta limitada|gana dinero|compra ahora|sin riesgo|100% gratis|trabaja desde casa|urgente|free|easy money|click here|limited offer|make money|buy now|no risk|work from home|urgent|act now)\\b",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1060,
+        -360
+      ],
+      "id": "376b9e86-41d5-46ef-a121-7feafb446e2b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('On form submission').item.json.submittedAt }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        -280
+      ],
+      "id": "12a996e7-4e4c-46a3-8a06-df69b8884f02",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Determine if the following messsage is a spam submission or not.\n\nRespond in the following JSON format (with true or false for the spam_rating):\n\n{\n  \"spam_rating\": true\n}\n\nHere is the message: \n{{ $('On form submission').item.json.Message }}\n",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -780,
+        -280
+      ],
+      "id": "0c1d921f-5d0d-45d0-979f-f73b024eb565",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -760,
+        -20
+      ],
+      "id": "ebb1b23e-f76e-4f83-a1d2-3794a080154a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nW367RweAyLgpzK",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "\n# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor item in _input.all():\n  x = True if item.json.text.split(\":\")[1].split(\"\\n\")[0][1:] == \"true\" else False\nreturn {\"spam_rating\": x}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        60
+      ],
+      "id": "99df82aa-795c-4bca-b12c-09d5c312a7ee",
+      "name": "Code",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"spam_rating\": true\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -540,
+        -20
+      ],
+      "id": "0463c903-4947-4f96-8514-c9349f762c9d",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Name ": "Diego Crespo",
+          "Emal address": "diego.crespo@gmail.com",
+          "Issue Type": "Billing & Payments",
+          "Message": "I can't pay the monthly",
+          "submittedAt": "2025-06-28T21:20:24.914-04:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message Tech",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message NonTech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "78004ad9-b372-4a59-a603-c83f0543f208",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "W0nlQa5fOeJ4yF8m",
+  "tags": []
+}

@@ -1,0 +1,377 @@
+{
+  "name": "Form Submission Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact us ",
+        "formDescription": "Please fill out the form below and we'll get back to you shortly ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Emal address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Issue Type",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Technical Issues"
+                  },
+                  {
+                    "option": "Billing & Payments"
+                  },
+                  {
+                    "option": "Collaboration &  Partnerships"
+                  },
+                  {
+                    "option": "General Inquiry"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -1100,
+        -220
+      ],
+      "id": "ee89025e-19d5-4e91-941f-9b9da04d18e1",
+      "name": "On form submission",
+      "webhookId": "6996db55-278b-4486-b988-625b1cf3d638"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY",
+          "mode": "list",
+          "cachedResultName": "n8n_tutorial",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LPG9OoNToH4KwP8-3LThrBYxyXxEgw2uCeBMISavoYY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submittedAt": "={{ $json.formattedDate }}",
+            "Name ": "={{ $('On form submission').item.json['Name '] }}",
+            "Message": "={{ $('On form submission').item.json.Message }}",
+            "formMode": "={{ $('On form submission').item.json.formMode }}",
+            "Issue Type": "={{ $('On form submission').item.json['Issue Type'] }}",
+            "Emal address": "={{ $('On form submission').item.json['Emal address'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Issue Type",
+              "displayName": "Issue Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emal address",
+              "displayName": "Emal address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "formMode",
+              "displayName": "formMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -660,
+        -220
+      ],
+      "id": "eb5179f5-3911-4354-85ed-2a80a49ed5ca",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nKJquAwaV6978rCY",
+          "name": "Google Auth Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.submittedAt }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -860,
+        -220
+      ],
+      "id": "ef31af25-c90a-43b0-95ae-ca426b277140",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Issue Type'] }}",
+                    "rightValue": "Technical Issues",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "520e5e0d-bdfb-4bbe-86b8-a650247b1377"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "523fa2ed-0f5b-44a3-a60a-df96ccb60136",
+                    "leftValue": "={{ $json['Issue Type'] }}",
+                    "rightValue": "Technical Issues",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -440,
+        -220
+      ],
+      "id": "3a1863d9-6fce-4a8b-9b23-f2a528dcd643",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "ecrespo@gmail.com",
+        "subject": "=Technical support: {{ $json['Emal address'] }}",
+        "emailType": "text",
+        "message": "=Full name: {{ $json['Name '] }}\n\nEmail Address: {{ $json['Emal address'] }}\n\nIssue Type: {{ $json['Issue Type'] }}\n\nMessage:\n{{ $json.Message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -220,
+        -320
+      ],
+      "id": "17e5a539-bcb8-4b03-913e-d01d3b90a85b",
+      "name": "Send a message Tech",
+      "webhookId": "7eee9c0d-be48-442a-b9f4-6b40bfa02f00",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "77xbDPkBHJIZC89K",
+          "name": "Gmail account Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ecrespo@gmail.com",
+        "subject": "={{ $json['Issue Type'] }}: {{ $json['Emal address'] }}",
+        "emailType": "text",
+        "message": "=Full name: {{ $json['Name '] }}\n\nEmail Address: {{ $json['Emal address'] }}\n\nIssue Type: {{ $json['Issue Type'] }}\n\nMessage:\n{{ $json.Message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -220,
+        -120
+      ],
+      "id": "35213e33-b216-416b-b14b-b319866926c9",
+      "name": "Send a message NonTech",
+      "webhookId": "7eee9c0d-be48-442a-b9f4-6b40bfa02f00",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "77xbDPkBHJIZC89K",
+          "name": "Gmail account Seraph"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Name ": "Diego Crespo",
+          "Emal address": "diego.crespo@gmail.com",
+          "Issue Type": "Billing & Payments",
+          "Message": "I can't pay the monthly",
+          "submittedAt": "2025-06-28T21:20:24.914-04:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message Tech",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message NonTech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "de55661a-4d57-4988-93c2-dc347950893d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "wk9I7yXLQa8kw24I",
+  "tags": []
+}
