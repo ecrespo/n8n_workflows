@@ -14,7 +14,7 @@
     },
     {
       "parameters": {
-        "command": "uv run python3 --version"
+        "command": "uvx cowsay -t \"Hola mundo!\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -78,7 +78,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "fa31cd49-0cc5-446d-b762-ccc1398b027b",
+  "versionId": "e2e3fe63-cfdf-46e4-8d91-6bcef457de03",
   "meta": {
     "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
   },
