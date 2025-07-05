@@ -1,0 +1,1722 @@
+{
+  "name": "Travel Planning Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Get travel information ",
+        "height": 560,
+        "width": 1300
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -220
+      ],
+      "id": "302b9628-e65d-486c-8b01-7585c0577515",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        -120
+      ],
+      "id": "d96b3ee2-51e0-4806-b6f6-25b2246d93af",
+      "name": "Telegram Trigger",
+      "webhookId": "1027f8e5-576e-4bab-b243-f8dd496058d1",
+      "credentials": {
+        "telegramApi": {
+          "id": "AEdelGbHW0UhHkSP",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Extract the following from the user message:\n\n* Origin City\n* Destination City\n* Departure Date\n* Return Date (if present)\n\n\nReturn this in JSON format:\n{\n\"origin\": \"\",\n\"destination\": \"\",\n\"departure_date\": \"\",\n\"return_date\": \"\",\n\"travelers\": \"\"\n}\n\nUser message: {{ $json.message.text }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -120
+      ],
+      "id": "39b5bf7d-3dba-438b-9850-f2858287c402",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "\n{\n\"origin\": \"string\",\n\"destination\": \"string\",\n\"departure_date\": \"string\",\n\"return_date\": \"string\",\n\"travelers\": \"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1020,
+        180
+      ],
+      "id": "a6bcb843-6b73-42c9-b410-560325b2d14f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1020,
+        460
+      ],
+      "id": "84efc3ce-9246-4bbb-ad78-ffbaf3604248",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nW367RweAyLgpzK",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8a2b5358-414d-4db5-8db5-24c4b0204c55",
+              "leftValue": "={{ $json.output.origin }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "36dfd066-95f6-4309-943e-59ab1148756d",
+              "leftValue": "={{ $json.output.destination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8c17c6e2-81c9-40b2-897e-355730880c9f",
+              "leftValue": "={{ $json.output.departure_date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "be7def57-24bb-4b31-b7ca-d5a20e8b7f07",
+              "leftValue": "={{ $json.output.travelers }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        120,
+        -120
+      ],
+      "id": "fcd64aec-6135-4587-81d3-6d47eaed9a4d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8cc327e9-6b85-44d8-a5a4-b668988aeb89",
+              "name": "origin",
+              "value": "={{ $json.output.origin }}",
+              "type": "string"
+            },
+            {
+              "id": "729bb82b-437e-461e-b7f0-c98bbf03ca3a",
+              "name": "destination",
+              "value": "={{ $json.output.destination }}",
+              "type": "string"
+            },
+            {
+              "id": "564aef70-d59c-47b1-b713-c129c9dddadd",
+              "name": "departure_date",
+              "value": "=  {{ $json.output.departure_date }}",
+              "type": "string"
+            },
+            {
+              "id": "eb72faed-988f-492b-aad5-8e93c057e966",
+              "name": "return_date",
+              "value": "={{ $json.output.return_date }}",
+              "type": "string"
+            },
+            {
+              "id": "14f5de8d-0d5c-4f8d-8fcc-63dd07cab36f",
+              "name": "travelers",
+              "value": "={{ $json.output.travelers }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        600,
+        -140
+      ],
+      "id": "afdc289e-a5ff-4698-8c3f-94b4162d3367",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "let missing = [];\nif (!$json.output.origin) missing.push(\"origin city\");\nif (!$json.output.destination) missing.push(\"destination city\");\nif (!$json.output.departure_date) missing.push(\"departure date\");\nif (!$json.output.travelers) missing.push(\"travelers\");\nreturn [{\n  json: {\n    missing: missing.length ? `Please provide: ${missing.join(\", \")}` : \"\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        160
+      ],
+      "id": "9491f10b-c63a-4d36-bb56-189c01547d73",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "-09230923",
+        "message": "={{$('Code').item.json.missing }}",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        160
+      ],
+      "id": "7b3ffe27-09c3-4750-9a35-5f4ebc21d716",
+      "name": "Send message and wait for response",
+      "webhookId": "c656ee2c-e44f-4fb3-bffe-b7d7f97d4b7e",
+      "credentials": {
+        "telegramApi": {
+          "id": "AEdelGbHW0UhHkSP",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        300,
+        160
+      ],
+      "id": "e48feabe-ad74-41d1-91c0-2cb525513270",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"origin\": {\n      \"type\": \"string\",\n      \"description\": \"The origin\"\n    },\n    \"destination\": {\n      \"type\": \"string\",\n      \"description\": \"The destination\"\n    },\n    \"departure\": {\n      \"type\": \"string\",\n      \"format\": \"date\",\n      \"description\": \"The departure date (YYYY-MM-DD)\"\n    },\n    \"return\": {\n      \"type\": \"string\",\n      \"format\": \"date\",\n      \"description\": \"The return date (YYYY-MM-DD)\"\n    }\n  }\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        660
+      ],
+      "id": "56068d4b-aa6c-4e92-bc55-0608544b7dbe",
+      "name": "Location & Dates"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        1200
+      ],
+      "id": "96e6179d-66b9-42ef-98aa-03252ad7f10c",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nW367RweAyLgpzK",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Origin: {{ $json.origin }}\nDestination: {{ $json.destination }}\nDeparture Date: {{ $json.departure_date }}\nReturn Date: {{ $json.return_date }}\n\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Search  origin and destination airport codes a Set the following.\nTurn the origin and destination into their airport codes.\n\nMake sure the departures and return dates are in the future, not the past.\n\nHere is the current date/time: {{ $now }}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -380,
+        460
+      ],
+      "id": "8863452e-3827-480a-9e53-8661c3447539",
+      "name": "Airport codes & Dates"
+    },
+    {
+      "parameters": {
+        "query": "={\n  \"query\": \" top things to do in {{ $('Edit Fields').item.json.destination }}\",\n  \"topic\":  \"general\", \n  \"search_depth\": \"basic\",\n  \"max_result\": 3,\n  \"time_range\": null, \n  \"days\": 3,\n  \"include_answer\": true, \n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_images_description\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": []\n}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        460
+      ],
+      "id": "42691b71-9681-48b9-b8b4-3017217bd2f8",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "tt8GEVS3xjInshHO",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "google_maps",
+        "q": "=Hotels in {{ $('Edit Fields').item.json.destination }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        460
+      ],
+      "id": "848c11f8-c666-4d00-9d1b-c41c32bbeb2b",
+      "name": "Google_maps search",
+      "credentials": {
+        "serpApi": {
+          "id": "Se2sDW4IPhSCmrQD",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "google_flights",
+        "departure_id": "={{ $('Airport codes & Dates').item.json.output.origin }}",
+        "arrival_id": "={{ $('Airport codes & Dates').item.json.output.destination }}",
+        "outbound_date": "={{ $('Airport codes & Dates').item.json.output.departure }}",
+        "return_date": "={{ $('Airport codes & Dates').item.json.output.return }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        600,
+        460
+      ],
+      "id": "718ba1bc-256e-4efd-af30-60f0eb83a40f",
+      "name": "Google_flights search",
+      "credentials": {
+        "serpApi": {
+          "id": "Se2sDW4IPhSCmrQD",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Flights and Hotels",
+        "height": 400,
+        "width": 1300,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        360
+      ],
+      "id": "75777d3a-b399-4b48-bfa0-e06c1139f1a6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Flights from {{ $('Edit Fields').item.json.origin }} to {{ $('Edit Fields').item.json.destination }}  on {{ $('Edit Fields').item.json.departure_date }}  to {{ $('Edit Fields').item.json.return_date }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an expert travel email writer at a leading travel agency.\n\nYour job is to create beautiful, engaging, and informative HTML emails that help travelers get excited for their upcoming trip.\n\n**Always output your response as a single valid JSON object containing two keys: \"subject\" and \"emailBody\".**\n\n- \"subject\":  A short subject line that mentions the arrival location and travel dates.\n- \"emailBody\": A complete, well-structured HTML email according to the instructions  below. \n\n---\n\n## Email Structure & Content\n\n1. Introduction\n  - Welcome the traveler and build excitement for their upcoming trip.\n  - Reference the destination and travel dates.\n  - Add a `<hr>` (horizontal line) after this section.\n\n2. Flights\n  - Use an `<h2>` header for this section.\n  - List both departure and return dates/locations. \n  - List each flight option with airline, time, duration and price. \n  - Separate each flight with a line break. \n  - End this section with a `<hr>`. \n\n3. Resorts\n  - Use an `<h2>` header for this section.\n  - List each resort with a numered list (`<ol>`). \n  - Each resort's name should be a clickable link (use the resort's website or booking URL). \n  - Under each resort name, display an image  using the following HTML format:\n    `<img src=\"{image url}\" style=\"max-width:20%;height:aut;>`\n  - Add a linea break after each image.\n  - Include price per night if available.\n  - End this section with a `<hr>`. \n\n4. Activities\n  - Use an `<h2>` header for this section. \n  - List recommended activities with the activity name as a clickable link (to the booking/info page).\n  - Include a 1-2 sentence description for each activity. \n  - Separate each activity with a line break.\n\n5. Signoff \n  - Sign off in a warm, friendly way, as \"FusionAir Travel Tzeam\". \n\n---\n\n## Formating Requirements\n\n- The entire emailBody must be valid HTML, using appropiate headings and tags. \n- Each major section should start with a heading (`<h2>`) and end with a horizontal line (`<hr>`), except for the signoff.\n- Clickable links must be use `<a href=\"{url}\"> ...</a>`style=\"max-width:20%; height:auto;>`. \n- The email must be less than 1000 words.\n- Output must be in JSON as show below.\n\n\n## Output Example\n\n{\n  \"subject\": \"Your Islamabad Getaway | June 17 - July 17, 2026\",\n  \"emailBody\": \"<html><body>\n    <p>Get ready for an incredible adventur! Your summer escape to Islamabad is almost here. We've put together the perfect plan to make this your most memorable trip yet<\\p>...\"\n}\n\n\n\n\n\n\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        860
+      ],
+      "id": "c61b1b39-f56c-4e2b-838e-798282904dda",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "sendTo": "ecrespo@gmail.com",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -60,
+        860
+      ],
+      "id": "d58067dc-640a-4be8-a600-ad14fe1ea0a3",
+      "name": "Send a message",
+      "webhookId": "ce5ae72b-cf8e-4680-a3c9-c061735710eb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "77xbDPkBHJIZC89K",
+          "name": "Gmail account Seraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1fe7287f-052f-4f10-a65c-d7cd4ce14181",
+              "name": "response",
+              "value": "=An email has been sent with the travel plan for: Your {{ $('Edit Fields').item.json.destination }} Journey | {{ $('Edit Fields').item.json.departure_date }}.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        860
+      ],
+      "id": "5ca84da9-5d3c-4bce-9aa6-2768e1f9fb20",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "chatId": "4277807",
+        "text": "={{ $json.response }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        860
+      ],
+      "id": "27fccd89-8a5f-434e-ae83-a0d03ba53baa",
+      "name": "Send a text message",
+      "webhookId": "cf2879b8-8b51-4b1a-8e87-a381c188a3a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "AEdelGbHW0UhHkSP",
+          "name": "Telegram account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"...\",\n  \"emailBody\": \"...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1080,
+        1240
+      ],
+      "id": "f342305c-e2ea-444b-ba7a-03e96e6e8d20",
+      "name": "Subject & Email"
+    },
+    {
+      "parameters": {
+        "content": "## LLM",
+        "height": 1380,
+        "width": 660,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        840,
+        -220
+      ],
+      "id": "3c21fdd7-f055-4982-bcf5-0a48f2cb3688",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Sending Travel Plan",
+        "height": 380,
+        "width": 1300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        780
+      ],
+      "id": "a667014e-08dd-475f-b16a-0750ea46d8fc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        880
+      ],
+      "id": "918a7aff-3e93-4d83-9c61-21d73372818b",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nW367RweAyLgpzK",
+          "name": "OpenAi account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 697512063,
+          "message": {
+            "message_id": 71,
+            "from": {
+              "id": 4277807,
+              "is_bot": false,
+              "first_name": "Seraph",
+              "username": "Seraph1",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 4277807,
+              "first_name": "Seraph",
+              "username": "Seraph1",
+              "type": "private"
+            },
+            "date": 1751722918,
+            "text": "Puedes darme información de vuelos de Caracas a Madrid del 17 de Enero 2026 al 17 de febrero de 2026 para una persona?"
+          }
+        }
+      }
+    ],
+    "AI Agent": [
+      {
+        "json": {
+          "output": {
+            "origin": "Caracas",
+            "destination": "Madrid",
+            "departure_date": "2026-01-17",
+            "return_date": "2026-02-17",
+            "travelers": "1"
+          }
+        }
+      }
+    ],
+    "Edit Fields": [
+      {
+        "json": {
+          "origin": "Caracas",
+          "destination": "Madrid",
+          "departure_date": "  2026-01-17",
+          "return_date": "2026-02-17",
+          "travelers": 1
+        }
+      }
+    ],
+    "Google_maps search": [
+      {
+        "json": {
+          "search_metadata": {
+            "id": "686946593ee4c2e0515ac472",
+            "status": "Success",
+            "json_endpoint": "https://serpapi.com/searches/bf5fc236afa0f2f2/686946593ee4c2e0515ac472.json",
+            "created_at": "2025-07-05 15:35:53 UTC",
+            "processed_at": "2025-07-05 15:35:53 UTC",
+            "google_maps_url": "https://www.google.com/maps/search/Hotels+in+Madrid?hl=en",
+            "raw_html_file": "https://serpapi.com/searches/bf5fc236afa0f2f2/686946593ee4c2e0515ac472.html",
+            "total_time_taken": 4.7
+          },
+          "search_parameters": {
+            "engine": "google_maps",
+            "type": "search",
+            "q": "Hotels in Madrid",
+            "google_domain": "google.com",
+            "hl": "en"
+          },
+          "search_information": {
+            "local_results_state": "Results for exact spelling",
+            "query_displayed": "Hotels in Madrid"
+          },
+          "local_results": [
+            {
+              "position": 1,
+              "title": "Hotel NH Collection Madrid Palacio de Tepa",
+              "place_id": "ChIJxw_vPYAoQg0RpusVRzoPyuQ",
+              "data_id": "0xd4228803def0fc7:0xe4ca0f3a4715eba6",
+              "data_cid": "16486006128918260646",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4228803def0fc7%3A0xe4ca0f3a4715eba6&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4228803def0fc7%3A0xe4ca0f3a4715eba6&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.413835,
+                "longitude": -3.7016169999999997
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJxw_vPYAoQg0RpusVRzoPyuQ",
+              "provider_id": "/g/12bfg2x_d",
+              "rating": 4.6,
+              "reviews": 1269,
+              "price": "$145",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "C. de San Sebastián, 2, Centro, 28012 Madrid, Spain",
+              "phone": "+34 913 89 64 90",
+              "website": "https://www.nh-hotels.com/en/hotel/nh-collection-madrid-palacio-de-tepa?utm_campaign=local-gmb&utm_medium=organic_search&utm_source=google_gmb",
+              "description": "Elegant lodging with dining & a spa. Modern quarters in a polished hotel offering a restaurant & a bar, plus a spa & a 24-hour gym.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOk0SDhVg-uHkZAcjHgnR4urDsoE8loCWP19EEc=w163-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/cNcdhHicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngn20Q7JIRlq5b6pEd5Zic5ZGeF2RSWuRSnO9qkZPvHB5gaOnqmmxbbmhmrJthaaSbrZuXDwCpaiEo"
+            },
+            {
+              "position": 2,
+              "title": "Hotel NH Madrid Nacional",
+              "place_id": "ChIJWwmVJyYmQg0R_w0baaK6vDw",
+              "data_id": "0xd4226262795095b:0x3cbcbaa2691b0dff",
+              "data_cid": "4376578144608128511",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4226262795095b%3A0x3cbcbaa2691b0dff&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4226262795095b%3A0x3cbcbaa2691b0dff&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.409962,
+                "longitude": -3.692674
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJWwmVJyYmQg0R_w0baaK6vDw",
+              "provider_id": "/g/1tf_plr4",
+              "rating": 4.3,
+              "reviews": 4005,
+              "price": "$102",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "P.º del Prado, 48, Centro, 28014 Madrid, Spain",
+              "phone": "+34 914 29 66 29",
+              "website": "https://www.nh-hotels.com/en/hotel/nh-madrid-nacional?utm_campaign=local-gmb&utm_medium=organic_search&utm_source=google_gmb",
+              "description": "Laid-back lodging with a bar & dining. Classic 1920s-era hotel with modern rooms & free Wi-Fi, plus a Mediterranean restaurant & a bar.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhEmLXD-biD2gS1luU4ohaOLm2GERyhunU9zsuAbeJunvIt9z_2NCbrPiXJAnuH-hs6iJPjLalNDhD6KJOOISRi8N_TVIyMi1w_pZGtvRZHUQNaqrx1OLtFiO7WNRJWwNlNu-4hB5ZI8lQKPQal2j-kLb-hzfoc9C5yP38VcfDgz1DRi7fSbCjh9=w122-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/fUR443icBcFLcoIwAADQE0WGiAqd6cISqyANv6IOGwYokGBIKCQi3NSLdN33Xn9Eyn580zRG1qtGiIZVaqyGUnBZcbkqRac1_Qj6QTxnbe_9GIgcOu-GQEERbGKdqcQQJPe9Dh4P0UwUT6xlVPuichV_ONJaMojtYgjozd1zdQJk3FI3aL2cYUTQ9uz6vhNH1MTZ98WZv6g-ZX16lI8oPSUhzn-Hp-578pP6uyuO3OuEGVbAIB-b1DFZeA7CnMEW3L0CkKUWpWVv5mBtXsoaNYuOIrqr48JuifU-6RACYkFwB1z8A28-VaM"
+            },
+            {
+              "position": 3,
+              "title": "DoubleTree by Hilton Madrid - Prado",
+              "place_id": "ChIJ91TnNoIoQg0RdcHlfO8WJmg",
+              "data_id": "0xd42288236e754f7:0x682616ef7ce5c175",
+              "data_cid": "7504711046907937141",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42288236e754f7%3A0x682616ef7ce5c175&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42288236e754f7%3A0x682616ef7ce5c175&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4152032,
+                "longitude": -3.6967835
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJ91TnNoIoQg0RdcHlfO8WJmg",
+              "provider_id": "/g/11cp5zrtzb",
+              "rating": 4.7,
+              "reviews": 984,
+              "price": "$135",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Banquet hall",
+                "Business center",
+                "Event venue",
+                "Wedding venue"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "banquet_hall",
+                "business_center",
+                "event_venue",
+                "wedding_venue"
+              ],
+              "address": "C. de San Agustín, 3, Centro, 28014 Madrid, Spain",
+              "phone": "+34 913 60 08 20",
+              "website": "https://www.hilton.com/en/hotels/madprdi-doubletree-madrid-prado/?SEO_id=GMB-EMEA-DI-MADPRDI",
+              "description": "Upmarket hotel with Japanese dining. Sophisticated lodging offering a Japanese & Mediterranean fusion restaurant, plus a bar & a gym.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipNVK7PE71HWWaiccc9el0jFl4sZzDGmquC0nRPh=w145-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/3ZwArnicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngF-ZtHuBqbugRHp6YmZycbJmaY5DllmNSHFXl4p5bWOpskBcUkGFbbmhiqpthaaSbrZuXDwCbxCEi"
+            },
+            {
+              "position": 4,
+              "title": "The Hat Madrid",
+              "place_id": "ChIJwYqcOX8oQg0Ru4qnNV1iiew",
+              "data_id": "0xd42287f399c8ac1:0xec89625d35a78abb",
+              "data_cid": "17044262417232005819",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42287f399c8ac1%3A0xec89625d35a78abb&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42287f399c8ac1%3A0xec89625d35a78abb&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.41431,
+                "longitude": -3.70707
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJwYqcOX8oQg0Ru4qnNV1iiew",
+              "provider_id": "/g/11b64q1ptc",
+              "rating": 4.3,
+              "reviews": 4414,
+              "price": "$63",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Hostel",
+                "Youth hostel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "hostel",
+                "youth_hostel"
+              ],
+              "address": "C. Imperial, 9, Centro, 28012 Madrid, Spain",
+              "phone": "+34 917 72 85 72",
+              "website": "http://www.thehatmadrid.com/",
+              "description": "Trendy hostel with free breakfast. Bright rooms & dorms in a laid-back lodging with a rooftop bar, plus free Wi-Fi & breakfast.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "service_options": {
+                "dine_in": true
+              },
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOzNsyNXas0REp3ifDUat8qa52BiEY5Duel-qOU=w116-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/mIHnh3icuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngX-VXXOkXkVhsEORaYJyZ5hKaWGJRmGhq5JTpGmnqUpqao1voH2pbbmhoppthaaSbrZuXDwCy2yFZ"
+            },
+            {
+              "position": 5,
+              "title": "Hyatt Centric Gran Via Madrid",
+              "place_id": "ChIJmSRJmn0oQg0Rt5YwR1qpFLQ",
+              "data_id": "0xd42287d9a492499:0xb414a95a473096b7",
+              "data_cid": "12976182631567759031",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42287d9a492499%3A0xb414a95a473096b7&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42287d9a492499%3A0xb414a95a473096b7&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4200081,
+                "longitude": -3.7036914
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJmSRJmn0oQg0Rt5YwR1qpFLQ",
+              "provider_id": "/g/11f1sw769w",
+              "rating": 4.6,
+              "reviews": 2138,
+              "price": "$206",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Gran Vía, 31, Centro, 28013 Madrid, Spain",
+              "phone": "+34 918 37 12 34",
+              "website": "https://www.hyatt.com/hyatt-centric/en-US/madct-hyatt-centric-gran-via-madrid?src=corp_lclb_google_seo_madct&utm_source=google&utm_medium=organic&utm_campaign=lmr",
+              "description": "Chic hotel with dining & a rooftop bar. Polished quarters in a sophisticated hotel with a modern restaurant, a rooftop bar & a 24/7 gym.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOYVxAc1qO6p6KDMQ_EokilSZqPU42vQX4jK8OE=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/yikTCnicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngHxlW4ZhsWOhvVmDm7eIbGO-an52ZExxVGBBqYlQWGGGS5W3h72pbbmhsoZthaaSbrZuXDwCgeCDi"
+            },
+            {
+              "position": 6,
+              "title": "NYX Madrid",
+              "place_id": "ChIJ_w2ZnP4oQg0RXDeSJe8eawY",
+              "data_id": "0xd4228fe9c990dff:0x66b1eef2592375c",
+              "data_cid": "462497399211964252",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4228fe9c990dff%3A0x66b1eef2592375c&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4228fe9c990dff%3A0x66b1eef2592375c&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4504478,
+                "longitude": -3.6979452999999998
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJ_w2ZnP4oQg0RXDeSJe8eawY",
+              "provider_id": "/g/1tkf28n3",
+              "rating": 4.2,
+              "reviews": 3379,
+              "price": "$78",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "C. del Aviador Zorita, 34, Tetuán, 28020 Madrid, Spain",
+              "phone": "+34 915 53 59 00",
+              "website": "https://www.leonardo-hotels.es/madrid/nyx-hotel-madrid?utm_source=gmb&utm_medium=link_site_gmb&utm_campaign=nyx-hotel-madrid",
+              "description": "Genteel property with dining & a bar. Simple rooms in a sophisticated property, with a restaurant and bar, plus breakfast buffet (fee).",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhH7uUn_eFu_MBT4ex8wvD1b-P87eJEW52C53IIszhnLdYgKGT2O6L2iHomnxuj0DjCVJOmcoCSrUxzqQUHzSZMAZllK7o_PT8lfuQjzMkilwUHcPet193JsH8C5MxueCjFu0V2piOOMEUGeBoyyQB8_O1pEjkumsDpSvXcuWTZDSFHTIZ2uEn3yCQ=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/gHx9MHicBcHddkMwAADgJ1IVNenO2UUFDeXgoN3cOGea-YskQ1q8ad9kl_u-118zz2J6V1Xa6Lua85oSOZGx4mwmbN5VfFBrMSli5MuqnoL7wW6wKXNWEleWoZUdyAKfD1v7VmJoEt-5GQAZuudNW8OC-1d9OWcgegtAi_nAFtnt7Q5d_WioOErHfNl-kxxvaRGeCkovJi_jDNIfmXRb2Lf0meMqJrN21P0JQ2SEiySoc-X-CkQbRaGTn4nF1zWxYBlpwul6OUy2SB-flbxlhZ26OPMKIB2mryj5eGo6VJojUHqF8X_bHVa4"
+            },
+            {
+              "position": 7,
+              "title": "Barceló Torre de Madrid",
+              "place_id": "ChIJL9uAaGUoQg0RCOhRVVqYJpQ",
+              "data_id": "0xd4228656880db2f:0x9426985a5551e808",
+              "data_cid": "10675387480474249224",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4228656880db2f%3A0x9426985a5551e808&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4228656880db2f%3A0x9426985a5551e808&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4244272,
+                "longitude": -3.7122081999999996
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJL9uAaGUoQg0RCOhRVVqYJpQ",
+              "provider_id": "/g/11c4t2qjtz",
+              "rating": 4.6,
+              "reviews": 2037,
+              "price": "$146",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Plaza de España, 18, Moncloa - Aravaca, 28008 Madrid, Spain",
+              "phone": "+34 915 24 23 99",
+              "website": "https://www.barcelo.com/es-es/barcelo-torre-de-madrid/?utm_source=google&utm_medium=organic&utm_campaign=my_business&utm_content=7333",
+              "description": "Sleek hotel with Plaza views & a spa. Modern rooms & suites, some with Plaza de España views, in a hip hotel featuring dining & a spa.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipN4HpJ-Kb-Ro1bFdPT9ApTpj0wYGASlZx84k7_A=w136-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/EN-t33icuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngZ-JR4KXrnaQblG-Y5JYSEGLpWBBSkGVQHunuGJwTVWFhkm0e72hbbmhsppthaaSbrZuXDwCM3iCI"
+            },
+            {
+              "position": 8,
+              "title": "Hotel Príncipe Pío",
+              "place_id": "ChIJ6QFOQXAoQg0R-QBBiiDpWeM",
+              "data_id": "0xd422870414e01e9:0xe359e9208a4100f9",
+              "data_cid": "16382381445504631033",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd422870414e01e9%3A0xe359e9208a4100f9&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd422870414e01e9%3A0xe359e9208a4100f9&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4211673,
+                "longitude": -3.714677
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJ6QFOQXAoQg0R-QBBiiDpWeM",
+              "provider_id": "/g/1q5cd_4sk",
+              "rating": 4.3,
+              "reviews": 2461,
+              "price": "$103",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Extended stay hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "extended_stay_hotel"
+              ],
+              "address": "Cta. de San Vicente, 14, Moncloa - Aravaca, 28008 Madrid, Spain",
+              "phone": "+34 915 47 08 00",
+              "website": "http://www.hotelprincipepio.com/?utm_source=google&utm_medium=organic&utm_campaign=Knowledge_Graph",
+              "description": "Charming hotel with a formal restaurant. Quaint lodging offering warm rooms, plus a formal restaurant, a bar & an elegant lounge.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipO7wNrxqKDN_cmQEFmbuyc68IhLGCyeFSRRkwX0=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/qFzeGXicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngb17uV1RR6O3iF5-cG-jqlptUWplsZuGZ4ePuXJnqFhwUlF0eYWBbbmhsoZthaaSbrZuXDwC57yGm"
+            },
+            {
+              "position": 9,
+              "title": "AC Hotel Carlton Madrid",
+              "place_id": "ChIJQ9W9my8mQg0R7Fn-yRS9uMo",
+              "data_id": "0xd42262f9bbdd543:0xcab8bd14c9fe59ec",
+              "data_cid": "14607633288362088940",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42262f9bbdd543%3A0xcab8bd14c9fe59ec&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42262f9bbdd543%3A0xcab8bd14c9fe59ec&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4051228,
+                "longitude": -3.6937021
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJQ9W9my8mQg0R7Fn-yRS9uMo",
+              "provider_id": "/g/1tx8vj00",
+              "rating": 4.3,
+              "reviews": 1625,
+              "price": "$132",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Meeting planning service"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "meeting_planning_service"
+              ],
+              "address": "Paseo de las Delicias, 26, Arganzuela, 28045 Madrid, Spain",
+              "phone": "+34 915 39 71 00",
+              "website": "https://www.marriott.com/en-us/hotels/madca-ac-hotel-carlton-madrid/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0",
+              "description": "Relaxed property with a bar & a gym. Unfussy rooms & suites in a casual lodging with a fitness room, a stylish bar & meeting space.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipNDYx5aRmhboUh8XhcAGeV4o21OmypNK9Iywkfg=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/jQkcNHicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFng5xJZYZoYlJuRlB-aYRGRkezonhpmkm9k6J9bWeDnbelZWZ6dlm5bbmhsoZthaaSbrZuXDwC02CG4"
+            },
+            {
+              "position": 10,
+              "title": "Hotel Sardinero Madrid",
+              "place_id": "ChIJWZmwnI4oQg0RYvW3tCw-MB4",
+              "data_id": "0xd42288e9cb09959:0x1e303e2cb4b7f562",
+              "data_cid": "2175306981751387490",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42288e9cb09959%3A0x1e303e2cb4b7f562&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42288e9cb09959%3A0x1e303e2cb4b7f562&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4282198,
+                "longitude": -3.6960865999999997
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJWZmwnI4oQg0RYvW3tCw-MB4",
+              "provider_id": "/g/124st8cny",
+              "rating": 4.6,
+              "reviews": 879,
+              "price": "$104",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Plaza de Alonso Martínez, 3, Chamberí, 28004 Madrid, Spain",
+              "phone": "+34 912 06 21 60",
+              "website": "http://www.hotelsardineromadrid.com/",
+              "description": "Upscale hotel with a chic lounge. Understated rooms & suites in a refined hotel offering a stylish cocktail lounge & 2 terraces.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhEfL5Cw_xUmiZcFiq2IzBlRn1E9sfihtcQEujOH-UUOOEVgkllGSJlrxpW5XyLF9CjUc6QoIP5xF-vhUFpAnojD-mkBLhHNEBz6-o89ngxMFNFxompw_4NuyXf2EGpkf1AAGD6OCIAlFQItEXVNL7hEVcop858EKRzxEXIuLp6xATtvaHNhpmDKFg=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/d_2FknicBcFRckQwAADQE2UNu5TO9CNI0FW621LTn52OkiCSlFjhpr1JP_ve7x9VSs6PhsHo8UCEIKxZ5maqBVcNV4dajAaRM5CT0JsB0-9TSFGb2sF608XYfda4-7GS3WdXbiJvbjuq6gta-jwGRZHnqCQDY9HbM5u0_LCrLcVe0Be1cxHJq60xuNMCS8hFH4Jx8FMaZ8jfHSBcjxP9gjOsxSjX2ylbtqq1UCSH1oQwCp08SCDDl0ShqszSB4rKWkjXdtH5umtUJUsqHQ3f1f0rzqgcwzMmT6t5dAH1LDAALv4BNe9Wpw"
+            },
+            {
+              "position": 11,
+              "title": "Only YOU Hotel Atocha",
+              "place_id": "ChIJjUEvDCQmQg0Ryh7Zw5eUWGg",
+              "data_id": "0xd4226240c2f418d:0x68589497c3d91eca",
+              "data_cid": "7518922957441801930",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4226240c2f418d%3A0x68589497c3d91eca&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4226240c2f418d%3A0x68589497c3d91eca&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4072946,
+                "longitude": -3.688325
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJjUEvDCQmQg0Ryh7Zw5eUWGg",
+              "provider_id": "/g/11clv5s5ss",
+              "rating": 4.4,
+              "reviews": 6445,
+              "price": "$108",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "P.º de la Infanta Isabel, 13, Retiro, 28014 Madrid, Spain",
+              "phone": "+34 914 09 78 76",
+              "website": "https://www.onlyyouhotels.com/hoteles/only-you-hotel-atocha/?y_source=1_MTU0MTQ0ODAtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D",
+              "description": "Upmarket hotel with dining & a gym. Warm quarters in an upscale hotel featuring 2 hip restaurant/bars, a bakery & a gym.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhHeufi1DwMgbbVXCN4yz2JayERPephzomG7y7mpcMlHDUoj2Fp18dCXm17Oa1zLaInhtyyoL0ILEZOdmxgN70KZiYXtTGHZC3PdEYH84HVG0IQme3RcyYG957zVaRxgQbi-9L8LTTvhCqdOVmkxIPL0_3O-Xp6tI0B6B2689MBPRE5h1fZN0__r=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/QwjbFnicBcHJUoMwAADQL0pZy-KMB1kENCxlkAEuDFsJlpAIqSX8aX_Es-89_xBjdHsRhBkpp5GQcR7u27B2ZGHDwk4dwcJIN0BXsnPhDfaqg_zhfp0k5xGObZsXdqTyQ_5ouJsmA0UHwZ7OdUy7cPadL_Itv1PJ6O0CS3rcSAdsggUxzgkUA-hWcY_3MdLFz2oqC5Z5fmUrSe-WvqH6uScGFzwoacdLzzzrR96k-3hpJ2BCA2bZL7J_-jjHtz1IoFgrMSioxgLR0ixZM8zQSlL3jKRrFYl1vb4-JMUAyJTBDSzkHyklU-w"
+            },
+            {
+              "position": 12,
+              "title": "Intelier Palacio San Martín",
+              "place_id": "ChIJTVtcF3woQg0REKDT5Fvhaf0",
+              "data_id": "0xd42287c175c5b4d:0xfd69e15be4d3a010",
+              "data_cid": "18260373948947734544",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42287c175c5b4d%3A0xfd69e15be4d3a010&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42287c175c5b4d%3A0xfd69e15be4d3a010&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4186427,
+                "longitude": -3.7067588999999996
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJTVtcF3woQg0REKDT5Fvhaf0",
+              "provider_id": "/g/1tff8xvk",
+              "rating": 4.5,
+              "reviews": 1292,
+              "price": "$111",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Espresso bar",
+                "Function room facility",
+                "Restaurant"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "espresso_bar",
+                "function_room_facility",
+                "restaurant"
+              ],
+              "address": "Pl. de San Martín, 5, Centro, 28013 Madrid, Spain",
+              "phone": "+34 917 01 50 00",
+              "website": "https://www.intelier.com/hotel-palacio-san-martin-madrid/",
+              "description": "Elegant lodging with a restaurant. Warmly decorated quarters in a refined property offering a gym & a restaurant with a terrace.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhH03hOZaifI1qUo0Tb1z1pulyy_EihCgMGwZvoT289K-4TMjYw0FCh07Gc0ecu0Jg6yE0dJcrNi0EfZN2C2L2tChD3pfy3H_M3SUDMUJLsLSfJ_Iav4RTnRo_P2ez8CxXnCbkyB5isPZYk_Cf0wlwA0ZO2XE9qk5YqzRHtRQ10AWWjmiWqVnRbarw=w139-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/E4O_rHicBcHddkMwAADgJ1KR6FY7ZxcWVjXaTply46CI0sRP2jTedG-yy33f7x_hfJjfVLUnaNUw1vTVfa6mklFeUb4q2U1thlkZJvaUqulddIs4AJFDmrf1ThsjBsJCW7Th3kuZ2S3Bjb8V6YOFcGN8KXroXxMBPjEBr9sSVOUduM2LtMHFLad9C-w63UMMPcgxsdBQS-RkPjpFlh-53uydajfb5Q89CGnAsiOslg1-nikuOvmxbudjmnQZroHohQnSAzzbxtitk3EJHB58a8CM4-utjccfGhT5JN6FhgyFGFDpFMr-AUqMVaI"
+            },
+            {
+              "position": 13,
+              "title": "Axel Hotel Madrid",
+              "place_id": "ChIJa727K4AoQg0RuWRcOWl_3Us",
+              "data_id": "0xd4228802bbbbd6b:0x4bdd7f69395c64b9",
+              "data_cid": "5466665612608300217",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4228802bbbbd6b%3A0x4bdd7f69395c64b9&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4228802bbbbd6b%3A0x4bdd7f69395c64b9&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4131709,
+                "longitude": -3.7005779999999997
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJa727K4AoQg0RuWRcOWl_3Us",
+              "provider_id": "/g/11g8xk9bkg",
+              "rating": 4.4,
+              "reviews": 2485,
+              "price": "$108",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "C. de Atocha, 49, Centro, 28012 Madrid, Spain",
+              "phone": "+34 910 88 33 80",
+              "website": "https://www.axelhotels.com/int/axel-hotel-madrid/hotel.html",
+              "description": "Vibrant, retro lodging with a pool. Lively hotel offering swanky rooms & suites with ’80s flair, plus dining, bars & a rooftop pool.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhFvs2a18u276m-GFoFvX5yb1oETTB_KiKclc9j4YjnKY8UhPzhtjpQj7v1WJ-tmHNcDbsDbUSEQukest_a9PEsBajzJ3KJcUXw9_iwmiGm68VsK1GtRlCFR00c8GfONlbzQV6IyZh9L92ghS2S2nop1CDcpXP-2xXOR4CvgHdxFg2YaTb9cvqnG=w172-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/e1SkxXicBcFLcoIwAADQE0UkUiCd6aLys-AoXwvdMBBpAgKhJnxv2ot03fd-_6gQA3-VpJYedoQx0lYjr56Y9aLqxQ6zTiIDB8OTLav0fr4rJrUnDgtZH6GmdsCxmT2lL2spMyuOj7lXe7jFqFGypvcyPaH-RkUzBI02yZ8uEN3pgs2Sm2USWcH4qLjIC-Rb_Fg0m3vwXJykM8rruaudTtVv3JMdEbaGHe73WHe-r5e23IKb-rF-UXRGkNAIRrBng2yYeEh9AJf0GirGRE73xSYwK-IS4emnd95mWYOAIggeoGf_FmBVXw"
+            },
+            {
+              "position": 14,
+              "title": "Petit Palace Lealtad Plaza",
+              "place_id": "ChIJ3y6t75woQg0RHzjjQVeoeuc",
+              "data_id": "0xd42289cefad2edf:0xe77aa85741e3381f",
+              "data_cid": "16679829262641084447",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42289cefad2edf%3A0xe77aa85741e3381f&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42289cefad2edf%3A0xe77aa85741e3381f&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4167093,
+                "longitude": -3.691041
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJ3y6t75woQg0RHzjjQVeoeuc",
+              "provider_id": "/g/1hg4rpdpq",
+              "rating": 4.5,
+              "reviews": 1411,
+              "price": "$95",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Event venue"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "event_venue"
+              ],
+              "address": "C. de Antonio Maura, 5, Retiro, 28014 Madrid, Spain",
+              "phone": "+34 915 22 45 47",
+              "website": "https://www.petitpalace-lealtadmadrid.com/en/?utm_source=google&utm_medium=organic&utm_campaign=MyBusiness&utm_content=LEA&origin_source=google&origin_medium=organic&origin_campaign=MyBusiness",
+              "description": "Upmarket hotel offering casual dining. Modern rooms, some with balconies, in an upscale hotel featuring a relaxed restaurant/bar.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "extensions": [
+                {
+                  "crowd": [
+                    "LGBTQ+ friendly"
+                  ]
+                }
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipP0GpTTmP0WktJkmVCUaI5QqyoYMvvu6ikVMhR6=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/AKjLeXicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFkQYOBeEBKSG2AQnl3ilZ0b5hya6GkaWFiZH-lbVlZqlpkd5psRZGZbbmhsoZthaaSbrZuXDwC02iG9"
+            },
+            {
+              "position": 15,
+              "title": "Hotel Villa Real",
+              "place_id": "ChIJEcwqzYMoQg0RCCoTHyzJ0rQ",
+              "data_id": "0xd422883cd2acc11:0xb4d2c92c1f132a08",
+              "data_cid": "13029697863273359880",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd422883cd2acc11%3A0xb4d2c92c1f132a08&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd422883cd2acc11%3A0xb4d2c92c1f132a08&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4155267,
+                "longitude": -3.6970883
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJEcwqzYMoQg0RCCoTHyzJ0rQ",
+              "provider_id": "/g/1wg5z9yk",
+              "rating": 4.5,
+              "reviews": 1290,
+              "price": "$128",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Pl. de las Cortes, 10, Centro, 28014 Madrid, Spain",
+              "phone": "+34 914 20 37 67",
+              "website": "https://www.hotelvillareal.com/",
+              "description": "Elegant hotel featuring modern dining. Refined hotel offering stylish rooms & suites, a modern Mediterranean restaurant/bar & a gym.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipMUkylAP1yqRGWUADgNRzWzpeK_wMTXaIWc0vwd=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/dJjCQHicuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFngG5pdmeMYYFhZGOQeHuroku4XVBVeVZDqHV_uGxKR6BmebFBWnmJbbmhsoZthaaSbrZuXDwDAqyIM"
+            },
+            {
+              "position": 16,
+              "title": "JW Marriott Hotel Madrid",
+              "place_id": "ChIJu3reIYEoQg0R03nKcrehefU",
+              "data_id": "0xd42288121de7abb:0xf579a1b772ca79d3",
+              "data_cid": "17688346820751292883",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42288121de7abb%3A0xf579a1b772ca79d3&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42288121de7abb%3A0xf579a1b772ca79d3&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4168934,
+                "longitude": -3.7000976
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJu3reIYEoQg0R03nKcrehefU",
+              "provider_id": "/g/11sc7czf5_",
+              "rating": 4.7,
+              "reviews": 326,
+              "price": "$394",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "C. de Sevilla, 2, Centro, 28014 Madrid, Spain",
+              "phone": "+34 914 18 97 70",
+              "website": "https://www.marriott.com/en-us/hotels/madjw-jw-marriott-hotel-madrid/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0",
+              "description": "Polished hotel with dining & a spa. Elegant hotel offering a fitness center & a spa, plus a restaurant, a bar & a breakfast buffet.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhHSkYZIvkFV0fQJLAVlnN7cpoJ0FiAL_WsoItwyIc1BEgAiC32qyreHSSFq9ZdTL59SwzeN1bIBTid8KNl-CsjS1h-3LupB2YEqVmNMc0oGVo1xpPddJ8ZcKCgoxm4uz3Ae-0MYEdLwnvabMA2PdQ14jOt0K9ExRV-VcGRiwXTQubX_Nv0iJiQG4Q=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/vegqx3icBcHJUoMwAADQL0pZHcEZDwGBAgFLYbBw6UgSIWUJ-9I_9U88-t7vXzXP_fQmCE2lnErOy4YuEx0x72bazSfMW6HsJ9CPfD8EiIj6UZ3jOsvdtbZT8SfyEEybLnzFPfdEm0F0_5q4O2-HiyXDKiEzFXk4RnqOY3vQc5KgFz3enjSUCtdIGNH8sAHm9IilCiho6Q05s4a0DQMscifl0t5fCPG0HPtmyfdWXZ4KpEAMMougrVu_iwDKFxJJ6uNzFn3d2q8pSLFzZdstiZbidg9XkXksctTofZMUDVS6DGrQ8X-mJ1WF"
+            },
+            {
+              "position": 17,
+              "title": "Hotel Urban",
+              "place_id": "ChIJgRC4boEoQg0Rl6-gmXVOYkY",
+              "data_id": "0xd4228816eb81081:0x46624e7599a0af97",
+              "data_cid": "5071702397368184727",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4228816eb81081%3A0x46624e7599a0af97&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4228816eb81081%3A0x46624e7599a0af97&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.416444899999995,
+                "longitude": -3.6986025999999996
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJgRC4boEoQg0Rl6-gmXVOYkY",
+              "provider_id": "/g/1vyn54fk",
+              "rating": 4.5,
+              "reviews": 1958,
+              "price": "$163",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Cra de S. Jerónimo, 34, Centro, 28014 Madrid, Spain",
+              "phone": "+34 917 87 77 70",
+              "website": "https://www.hotelurban.com/",
+              "description": "Luxe art deco property with posh dining. Plush rooms in a refined art deco hotel with an acclaimed restaurant & an oyster/cocktail bar.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhE0Eu4TeUzmJ6cDpdZ8gdUnQkS0tkux8AiCVndcD2CND_cGHGQSwSQaQXbQb0sb9l_8NRkUgN7K-aEyV5U_IsVioDvcptj9czLKOMH7FErgU4csm6KsLjpmnLDjGQTyh-BUEyAVykqHj2MH4akLMkoQsewfIOieSf3xXYd5DstQOp7k5o5wk9Q=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/_Xr0eXicBcHddkMwAADgJ1KmFDtnF9YYnb-TKafbjUOkQZBMYuib7kF2v-_7_Wul5OJZVYf2eCCMkQEvAs-ITRJP8oDYqBIuFD6zbVfdqDFA62neYlxx_hjfTwjw5ssmTT5BmmmSLpvtdudiahDQzwkokR_4MFszWMFbDWtN1M5Q2skHzUlihUrl7YWZlxdRdAz8IC57Bz2iMI0D682bSW4gMZ5CEfV8nCLQ-_C6t8pr7u1usdPvoNfjwKhoFFMGBV7vl7TD2f243T4bEwgJU25Rk5krdeDL-nS0ldbRFapM7B8XSlY-"
+            },
+            {
+              "position": 18,
+              "title": "The Madrid EDITION",
+              "place_id": "ChIJCxdsfjUpQg0RrsGeIGEirWw",
+              "data_id": "0xd4229357e6c170b:0x6cad2261209ec1ae",
+              "data_cid": "7830953127621607854",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4229357e6c170b%3A0x6cad2261209ec1ae&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4229357e6c170b%3A0x6cad2261209ec1ae&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4175359,
+                "longitude": -3.7060301
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJCxdsfjUpQg0RrsGeIGEirWw",
+              "provider_id": "/g/11pd_m90k7",
+              "rating": 4.5,
+              "reviews": 1055,
+              "price": "$344",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "Pl. de Celenque, 2, Centro, 28013 Madrid, Spain",
+              "phone": "+34 919 54 54 20",
+              "website": "https://www.marriott.com/en-us/hotels/madeb-the-madrid-edition/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0",
+              "description": "Posh hotel with restaurants & a pool. Contemporary rooms & suites in a chic hotel featuring 2 restaurants, an outdoor pool & a spa.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhGetbzFKNn2ZsehX2X_3hmvs17bpWIyqLcTPzsl5NBae25L1AiXEUscdtf60CKlztM9Nu3NxEZxSoeC8A7djOR3xl4aNn-IvhRjzyoH0EEP9awGI2KYjxRUvDeTW4zI-tqCHDmMwKjSRuTezSKjnsFs3daaaXo-JCYQ1UW0t0QuMoj-dorOMBAm=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/FJLhBHicBcFLcoIwAADQE0U-wSqd6QIBlfJR-QzophMhJU2BIAkCuakX6brvvf6IED1_V5SGwFXNWN3gkeOhZJ3AnViVrFXqnoN-YPOiWEFlOOSAxV3u_ajTbxyTQi--IGmfXNvc-9xbHkGZniVv1tEOYX0daNZP4Wa8rMT3m2r7jRShGY0wmt3bnDBsb61NRU8xnBsDRR3wniSmcmFH1XXPJpoOnu5f6RxnTwenuSE9IB720WnDyadJPKZYJj7t-J7DCiFUMPBpXy9alqtCvYwho6BiwyncWe3HpMEtIKYOfkHH_gGkkFZ3"
+            },
+            {
+              "position": 19,
+              "title": "Inhala Hotel Garden",
+              "place_id": "ChIJvRXhe3soQg0R6SU6s7IBEGg",
+              "data_id": "0xd42287b7be115bd:0x681001b2b33a25e9",
+              "data_cid": "7498495246594614761",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd42287b7be115bd%3A0x681001b2b33a25e9&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd42287b7be115bd%3A0x681001b2b33a25e9&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4206587,
+                "longitude": -3.7085481999999996
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJvRXhe3soQg0R6SU6s7IBEGg",
+              "provider_id": "/g/11b6yc76ww",
+              "rating": 4,
+              "reviews": 5837,
+              "price": "$95",
+              "type": "Hotel",
+              "types": [
+                "Hotel"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel"
+              ],
+              "address": "C. de San Bernardo, 1, Centro, 28013 Madrid, Spain",
+              "phone": "+34 915 47 98 00",
+              "website": "https://inhalahotel.com/",
+              "description": "Upscale property with a rooftop pool. Stylish rooms in a high-end hotel featuring dining, a rooftop pool & meeting space.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipPAYlMP0DcaXBK0y0lYfjrCyn_MKRv4MpiZSdTu=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/RL9N03icuxmXUVJSUGylr5-TYayXnp-fnpNaWpxalJyfV5KaV6KXnJ-rX6Dv6GYYmFkQ4BiZ4xtg4JKcGOHkbVBpkBOZllXkXJkX7-sdVGbiW5AZFZwSUmpbbmhsoZthaaSbrZuXDwCplyGL"
+            },
+            {
+              "position": 20,
+              "title": "Leonardo Hotel Madrid City Center",
+              "place_id": "ChIJU9-luLYpQg0RP5Y1d4iC10c",
+              "data_id": "0xd4229b6b8a5df53:0x47d782887735963f",
+              "data_cid": "5176749819312838207",
+              "reviews_link": "https://serpapi.com/search.json?data_id=0xd4229b6b8a5df53%3A0x47d782887735963f&engine=google_maps_reviews&hl=en",
+              "photos_link": "https://serpapi.com/search.json?data_id=0xd4229b6b8a5df53%3A0x47d782887735963f&engine=google_maps_photos&hl=en",
+              "gps_coordinates": {
+                "latitude": 40.4302141,
+                "longitude": -3.7085214
+              },
+              "place_id_search": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJU9-luLYpQg0RP5Y1d4iC10c",
+              "provider_id": "/g/1hc3g6sk0",
+              "rating": 4.3,
+              "reviews": 2867,
+              "price": "$85",
+              "type": "Hotel",
+              "types": [
+                "Hotel",
+                "Restaurant"
+              ],
+              "type_id": "hotel",
+              "type_ids": [
+                "hotel",
+                "restaurant"
+              ],
+              "address": "C. de Alberto Aguilera, 18, Chamberí, 28015 Madrid, Spain",
+              "phone": "+34 914 46 09 00",
+              "website": "https://www.leonardo-hotels.es/madrid/leonardo-hotel-madrid-city-center?utm_source=gmb&utm_medium=link_site_gmb&utm_campaign=leonardo-hotel-madrid-city-center",
+              "description": "Relaxed lodging with a terrace. Warm rooms & suites in a laid-back property featuring a terrace & complimentary Wi-Fi.",
+              "amenities": [
+                "Free Wi-Fi"
+              ],
+              "thumbnail": "https://lh3.googleusercontent.com/gps-proxy/ALd4DhEyJUo5Vx6XBtYlhZNLTrnrvjoBCtOf4w-22Rgl-teC-QowDSXgYIbef6dHwZxCkWtLDsd5J1fQj9jjFBs3Ri59bij9U0U3GK-julfZjKLsrWWI5RT1UCeRwm8DRKQEUMr282RVcnzfNl1WwQ0Z0WYoyuGBOc6f3Kzu7k_XfhucmU9vseGoq1U=w138-h92-k-no",
+              "serpapi_thumbnail": "https://serpapi.com/images/url/l7zYTnicBcFLcoIwAADQE0V-QqEzXRSwVKE6RCOfTWeEBAyBUBIMeNMepPu-9_vXSjmKV01jrbVpOG8YngWeKj5IPMhNxXutGQUYJ76s2ntSb8N2tx4Qt6-Lk_uyYG15TC7TMD0o9wN5IlsFTBM2DEgcgJSr8Jw3xf6GiVN_qnIJukwmoajtg0FS6lH64QsL3m3vdqce0pEVxYDOjJQ0TsSUZXsbXgwUYKh6N4RxukNfk-ma8FoNT3JkRqZSvdSzgq9z5J8qh1jxc37pvnPSzlWPvIfAEf8x0JsyLBe0ngk6MPB_CyxVug"
+            }
+          ]
+        }
+      }
+    ],
+    "Search": [
+      {
+        "json": {
+          "query": "{\n  \"query\": \" top things to do in Madrid\",\n  \"topic\":  \"general\", \n  \"search_depth\": \"basic\",\n  \"max_result\": 3,\n  \"time_range\": null, \n  \"days\": 3,\n  \"include_answer\": true, \n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_images_description\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": []\n}",
+          "follow_up_questions": null,
+          "answer": null,
+          "images": [],
+          "results": [
+            {
+              "url": "https://www.madrid-traveller.com/things-to-do-in-madrid/",
+              "title": "Things to do in Madrid: My 2024-2025 bucket list",
+              "content": "Start with my 17 best things to do in Madrid · Visit the main attractions · Watch a live flamenco show · Experience a bullfight · Go to a football match · Chill out",
+              "score": 0.8657814,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.tripadvisor.com/Attractions-g187514-Activities-Madrid.html",
+              "title": "THE 15 BEST Things to Do in Madrid (2025) - Must-See Attractions",
+              "content": "Book a cultural tour for access to museums, the Royal Palace of Madrid, and day trips to Toledo. Fuel up on food (tapas, anyone?) before checking out the",
+              "score": 0.8622012,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.esmadrid.com/en/events-calendar",
+              "title": "Madrid Events Calendar: 2025",
+              "content": "Madrid Top 10. Discover the city's most popular sights and attractions, from one of Europe's largest royal palaces to the magnificent Prado Museum and the Real",
+              "score": 0.8533396,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.reddit.com/r/MadridTravelGuide/comments/1gbp4x4/2025_in_madrid/",
+              "title": "2025 in Madrid : r/MadridTravelGuide - Reddit",
+              "content": "Madrid has always been a safe city and you can usually walk around alone in the centre late at night with two important exceptions.",
+              "score": 0.5798055,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.cntraveler.com/story/best-things-to-do-in-madrid",
+              "title": "The Best Things to Do in Madrid, According to a Local",
+              "content": "Here, we have gathered together Madrid's most iconic places, the ones that are must-sees and where you should head first, especially if your time is limited.",
+              "score": 0.31887794,
+              "raw_content": null
+            }
+          ],
+          "response_time": 2.65
+        }
+      }
+    ],
+    "Airport codes & Dates": [
+      {
+        "json": {
+          "output": {
+            "origin": "CCS",
+            "destination": "MAD",
+            "departure": "2026-01-17",
+            "return": "2026-02-17"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Airport codes & Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Location & Dates": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Airport codes & Dates",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Airport codes & Dates",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airport codes & Dates": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Google_maps search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_maps search": {
+      "main": [
+        [
+          {
+            "node": "Google_flights search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_flights search": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subject & Email": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Location & Dates",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0f546f92-5ab7-4594-890d-5310b08496ce",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "n08vyWpgAWhawjKx",
+  "tags": []
+}
