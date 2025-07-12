@@ -1,0 +1,188 @@
+{
+  "name": "chatbotRAG1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -620,
+        -220
+      ],
+      "id": "b045a613-922f-4cee-bfeb-8f3e3ba96ef4",
+      "name": "When chat message received",
+      "webhookId": "9a3e5bd7-e0f3-4cfd-b0da-85db50359f96"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Eres un asistente técnico especializado en el vehiculo MG3. Tu función es responder exclusivamente preguntas relacionadas con el contenido del manual del usuario del MG3, utilizando una base de datos vectorial que contiene toda la información relevante del documento. \n\nHerramientas disponibles: \n\nbase_de_datos_disponible: Usa está herramienta para recuperar información específica sobre el manual MG3. \n\n\nInstrucciones: \n\nResponde sólo si encuentras información específicamente en la base de datos. \n\nNo inventes ni adivines respuestas.\n\nSi no encuentras la información en la base, responde con el siguiente mensaje estandar: \n\n\"Lo siento, no encontré una respuesta específica a tu pregunta en el manual del MG3. Te recomiendo revisar directamente el documento o consultar con un servicio técnico autorizado.\"\n\nManten un tono profesional, claro y objetivo. \n\nTu prioridad es entregar información verificada, sin agregar opiniones ni suposiciones. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -400,
+        -220
+      ],
+      "id": "d1c48915-87fd-4d3b-a786-a4c73e2a8f24",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -580,
+        60
+      ],
+      "id": "494ccf56-9bf8-4dc4-963e-30a55461aecc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "F9uBzET4rLQFcPsU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        60
+      ],
+      "id": "fac0ef3c-1432-4a7d-b363-584c2fa4c0c7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "MG3",
+        "toolDescription": "Manual del MG3",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-test",
+          "mode": "list",
+          "cachedResultName": "n8n-test"
+        },
+        "topK": 10,
+        "options": {
+          "pineconeNamespace": "MG3"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        40
+      ],
+      "id": "7a91fc26-992a-481b-b4c2-f3df009f5157",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "6i8GVvJNMmyWAmlt",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        260
+      ],
+      "id": "d2504dfd-7777-481a-a5be-fbaa2ddea3ed",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "F9uBzET4rLQFcPsU",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33e78e78-3b4d-47b9-86f5-c35e75826749",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ee1cf731afadd4ff2eb0ec2fd8cdd7bc4d564a7e22825b38dec3d20f1befef"
+  },
+  "id": "L0Z1fLUGmA9eXxaO",
+  "tags": []
+}

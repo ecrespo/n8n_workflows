@@ -1,0 +1,618 @@
+{
+  "name": "HTTP web scraping_Serper_Firecrawl_Airtable_Chatbot_RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30494a08-f709-454a-ab4f-e84b847e2470",
+              "name": "topic",
+              "value": "openai",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        -380
+      ],
+      "id": "c320fdf6-9a6b-459b-af04-ef0c74d09dd2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "news",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -380
+      ],
+      "id": "a9ab5a5e-6255-4d02-91c8-e4472fb36c7b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/news",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "e57a792ccc979174b6f7e968a73e816d5d6a5f9a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=openai {{ $json.topic }}"
+            },
+            {
+              "name": "tbs",
+              "value": "qdr:d"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        -380
+      ],
+      "id": "a96ea582-1917-4da4-acdf-26055c6786cd",
+      "name": "Google Searching"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer fc-b389caedad534ffe836163dfc8a898b2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.link }}\",\n  \"formats\": [\n    \"markdown\"\n  ],\n  \"waitFor\": 8000\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        -380
+      ],
+      "id": "8b9f6603-de6a-4871-8ce0-9acf11670cf8",
+      "name": "Web Scraping",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dd6901e0-7e4f-40a0-8ca2-631ddd3bf3e9",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        200,
+        -380
+      ],
+      "id": "618f1b20-c8ef-44b2-bffd-fa4193e5c202",
+      "name": "If",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app12OW7cVBam5rmh",
+          "mode": "list",
+          "cachedResultName": "N8N",
+          "cachedResultUrl": "https://airtable.com/app12OW7cVBam5rmh"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldyNGojnCFiuWUc",
+          "mode": "list",
+          "cachedResultName": "news",
+          "cachedResultUrl": "https://airtable.com/app12OW7cVBam5rmh/tbldyNGojnCFiuWUc"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "markdown": "={{ $json.data.markdown }}",
+            "title": "={{ $('Split Out').item.json.title }}",
+            "url": "={{ $('Split Out').item.json.link }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "markdown",
+              "displayName": "markdown",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        -400
+      ],
+      "id": "370b03d3-f6c2-48a4-9861-9345c5dee7c5",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "hpgQ3awpGiFQXIzF",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "news_openai",
+          "mode": "list",
+          "cachedResultName": "news_openai"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        -180
+      ],
+      "id": "a74becde-5a29-4cb0-891e-ebfc007581c5",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "AP3BeCw8A6nCDnN3",
+          "name": "QdrantApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6c39620f-dc59-4df3-bc84-c31da19571d1",
+              "name": "fields.markdown",
+              "value": "={{ $json.fields.markdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -680,
+        -180
+      ],
+      "id": "39189db3-0e94-489c-83e1-a51e5afae411",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -500,
+        -20
+      ],
+      "id": "12af130b-ecba-426c-a05e-742c47662b3a",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "F9uBzET4rLQFcPsU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        60
+      ],
+      "id": "f069e58c-bd6f-4141-9b76-3aae83ecadaa",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        200
+      ],
+      "id": "d0040c6d-ddd8-43ae-8914-6f4980aad03b",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -100,
+        -60
+      ],
+      "id": "33421ea2-6ca7-42e9-b76d-6e42db9f4528",
+      "name": "When chat message received",
+      "webhookId": "b4fa6774-3364-42e0-9323-81309c874424"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        80,
+        -60
+      ],
+      "id": "5b0602ce-1030-45ea-b43d-5995af6e4fb1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        180
+      ],
+      "id": "4d711009-ab95-4554-8af9-078ad48e5a4f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "NDX8qm6YPEB9va6e",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "news_openai",
+        "toolDescription": "Talk  with your data ",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "news_openai",
+          "mode": "list",
+          "cachedResultName": "news_openai"
+        },
+        "topK": 6,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        120
+      ],
+      "id": "f6722cad-da18-4614-bcdb-f3d61a4ce7ad",
+      "name": "Qdrant Vector Store1",
+      "credentials": {
+        "qdrantApi": {
+          "id": "AP3BeCw8A6nCDnN3",
+          "name": "QdrantApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        300
+      ],
+      "id": "af88d31d-d47e-4681-b6c8-f68b74e72aed",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "F9uBzET4rLQFcPsU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -720,
+        -380
+      ],
+      "id": "129bb497-c067-428b-98c1-edbf19fa6617",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Google Searching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Web Scraping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Searching": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Scraping": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "39fc2202-a9a2-442e-8489-701fc66f94a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ee1cf731afadd4ff2eb0ec2fd8cdd7bc4d564a7e22825b38dec3d20f1befef"
+  },
+  "id": "b6j06PGkFtKSNc4P",
+  "tags": []
+}

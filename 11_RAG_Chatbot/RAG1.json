@@ -1,0 +1,190 @@
+{
+  "name": "RAG1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        -220
+      ],
+      "id": "449e6122-10fe-43a9-b608-9379c6b13a97",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "https://drive.google.com/file/d/1hTP8DBPCmT-mH-kSfJ8dEkaghu7OrCLM/view",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -440,
+        -220
+      ],
+      "id": "f92caa7e-ac94-413b-882f-e5d462dbd178",
+      "name": "Google Drive",
+      "credentials": {
+        "googleApi": {
+          "id": "nE2FxQEn4FJ9xbJa",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-test",
+          "mode": "list",
+          "cachedResultName": "n8n-test"
+        },
+        "embeddingBatchSize": 512,
+        "options": {
+          "pineconeNamespace": "MG3"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        -220
+      ],
+      "id": "c45daaf8-9b41-4df4-85df-2709764601ad",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "6i8GVvJNMmyWAmlt",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "batchSize": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        80
+      ],
+      "id": "4cac353e-69ff-45cb-b026-d5dcac1d3ebe",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "F9uBzET4rLQFcPsU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "c8350796-1a81-439b-b952-d42190e3e399",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 50,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        20,
+        220
+      ],
+      "id": "184fda88-0d81-4f55-9ee0-a4e9c4b0de15",
+      "name": "Recursive Character Text Splitter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b8b70e16-e2f5-45d7-a881-1c9887d65e73",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ee1cf731afadd4ff2eb0ec2fd8cdd7bc4d564a7e22825b38dec3d20f1befef"
+  },
+  "id": "gtjM4xgUTkLNsSFy",
+  "tags": []
+}
