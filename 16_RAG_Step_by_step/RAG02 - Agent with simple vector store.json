@@ -1,0 +1,335 @@
+{
+  "name": "RAG02 - Agent with simple vector store",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -528,
+        -192
+      ],
+      "id": "cff82375-3f35-4099-8028-8357e99da367",
+      "name": "When chat message received",
+      "webhookId": "0fc4a767-df75-473e-8cb5-1cf1af1e603b"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an F1 Expert\n\nYou are tasked with answering a question using the information retrieved from tha attached vector store. \n\nYour goal is to give an accurate answer based on this information ONLY.\n\nIf you cannot answer the question using the provided informationor if no information is returned from vector store, say \"Sorry I don't know\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -192
+      ],
+      "id": "3cdf16be-4da1-4482-8768-7a9cec92b5ba",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        176
+      ],
+      "id": "4d8dcb4a-d679-4ba9-9e9f-02672cf9e77d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        144
+      ],
+      "id": "4a33e9aa-24d2-4e39-a0c0-6a50074b9559",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "This is a repository of F1 regulations",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "topK": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        64
+      ],
+      "id": "284c29f6-ecc1-455e-86f0-ee5a57c402e7",
+      "name": "f1_regulations"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        272
+      ],
+      "id": "d55074e7-c3a8-4170-aa82-e8b5d06f8170",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -576
+      ],
+      "id": "48d9cf4b-e398-49ab-9004-e8f95662ed5d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        -704
+      ],
+      "id": "4edf0dbc-f541-45ff-a339-fb424a57f8b4",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        -448
+      ],
+      "id": "513ae9bf-70ab-4880-aa3b-98e289492d60",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "loader": "pdfLoader",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        -496
+      ],
+      "id": "7b6f00c1-7109-4516-8ba1-998c9547ac5b",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -304
+      ],
+      "id": "410e62b9-22e7-4ebb-af95-72e073e80891",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_c_technical_-_iss_12_-_2025-06-10.pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        -576
+      ],
+      "id": "ad5a76da-889a-412d-8388-1efe1006782c",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "f1_regulations": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "f1_regulations",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ff75669-fc35-4951-af8c-63549b885508",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "6Nr5Q8DLr9BrJCwG",
+  "tags": [
+    {
+      "createdAt": "2025-07-24T18:09:12.455Z",
+      "updatedAt": "2025-07-24T18:09:12.455Z",
+      "id": "lfDC6vu8rgzvsFXK",
+      "name": "RAG"
+    }
+  ]
+}

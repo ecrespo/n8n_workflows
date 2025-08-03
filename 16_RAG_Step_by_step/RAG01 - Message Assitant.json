@@ -1,0 +1,78 @@
+{
+  "name": "RAG01 - Message Assitant",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        -176
+      ],
+      "id": "7e843ffa-f3e7-4261-b61a-93e095e3c594",
+      "name": "When chat message received",
+      "webhookId": "5abf2e29-712e-4ed8-85e7-157a6042ab9e"
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_A5e2EY0bTCy2l1mjR2VmKAfR",
+          "mode": "list",
+          "cachedResultName": "F1 Advisor"
+        },
+        "memory": "threadId",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -16,
+        -176
+      ],
+      "id": "fb8802ce-7cc4-4333-8f05-079a08c5b496",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "13f7332c-28d1-4a91-bda0-914f3960a41d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "OdlXTA9r0d9W2UmV",
+  "tags": [
+    {
+      "createdAt": "2025-07-24T18:09:12.455Z",
+      "updatedAt": "2025-07-24T18:09:12.455Z",
+      "id": "lfDC6vu8rgzvsFXK",
+      "name": "RAG"
+    }
+  ]
+}

@@ -1,0 +1,1289 @@
+{
+  "name": "RAG05 - Agent Metadata filtering",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -544
+      ],
+      "id": "7d440fd0-1626-49de-885c-a5912b8fd59e",
+      "name": "When chat message received",
+      "webhookId": "0addaee9-40d4-40d5-b073-21bdf8740b94"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are an F1 Expert\n\nYou are tasked with answering a question using the information retrieved from tha attached vector store. \n\nYour goal is to give an accurate answer based on this information ONLY.\n\nIf you cannot answer the question using the provided informationor if no information is returned from vector store, say \"Sorry I don't know\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        -544
+      ],
+      "id": "b2f46688-5ed1-4084-91a6-f72b152e83a6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        -256
+      ],
+      "id": "679074ec-19d8-4ca9-b53f-e7f5717bab66",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        -240
+      ],
+      "id": "d449a6c3-8704-426c-b23b-ad66120518c5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        -112
+      ],
+      "id": "0ce9ed6c-286d-4f2a-80fb-ea68cc509881",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2160,
+        -624
+      ],
+      "id": "20e06501-e84a-4995-a330-b7ecaae19ca2",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file_id",
+                "value": "={{ $('Edit Fields2').item.json.file_id}}"
+              },
+              {
+                "name": "filename",
+                "value": "={{ $('Edit Fields2').item.json.filename }}"
+              },
+              {
+                "name": "file_summary",
+                "value": "={{ $('Edit Fields2').item.json.document_summary }}"
+              },
+              {
+                "name": "motorsport_category",
+                "value": "={{ $('Edit Fields2').item.json.motorsport_category }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2416,
+        -608
+      ],
+      "id": "f1ff9a54-3030-4f0d-9085-6b0ef208a4b2",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        -416
+      ],
+      "id": "51963c2a-689c-4b17-be1c-5898ed9656ee",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Retrieve relevant details on Formula 1 with this tool",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 20,
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "motorsport_category",
+                "value": "={{ $json.output.motorsport_category }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        1008,
+        -336
+      ],
+      "id": "dd22915c-58ed-429f-9438-c87731704127",
+      "name": "f1_knowledgebase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        -864
+      ],
+      "id": "144161bf-c0b3-4b5d-972f-5a992861891a",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -1056
+      ],
+      "id": "1cc5a31c-0d4d-42d7-958f-e73ff205fd5d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1ymFSkROykqqVCLQJCJ2tZfgTFuyM2o1-",
+          "mode": "list",
+          "cachedResultName": "F1_Advisor",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ymFSkROykqqVCLQJCJ2tZfgTFuyM2o1-"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        -992
+      ],
+      "id": "248b1d92-9114-42a4-8284-9713b829cbd2",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bsx3evMTlNzmr0D4",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.file_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        -976
+      ],
+      "id": "dd220083-1448-4fdb-9a6b-618f921d4803",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bsx3evMTlNzmr0D4",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "type": "SHA256",
+        "binaryData": true,
+        "dataPropertyName": "hash"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -976
+      ],
+      "id": "f076b3d2-1b1a-4bc3-949f-8346768a8abf",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -768,
+        -992
+      ],
+      "id": "0f8fb219-f7bc-43ec-8eff-84270ece6c4e",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39ba533d-0112-4544-a8ce-65f3d7d146db",
+              "name": "file_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "911e287b-ba2a-469c-bddb-b9ef983ac886",
+              "name": "filename",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        -976
+      ],
+      "id": "1b0b7522-fda0-4804-b6c9-a2496266d4cd",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "9e66fa00-2316-44a1-a860-ab63659ca001"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cb757e20-ac84-43f4-aba0-eb57a5f37e31",
+                    "leftValue": "={{ $json.hash }}",
+                    "rightValue": "={{ $('Crypto').item.json.hash }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cc3cbccf-8dee-4492-afce-b4441c4d8586",
+                    "leftValue": "={{ $json.hash }}",
+                    "rightValue": "={{ $('Crypto').item.json.hash }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        304,
+        -992
+      ],
+      "id": "bae9b8fb-c9b7-4a4d-ba8c-c989792f0af2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.google_drive_file_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1184,
+        -1056
+      ],
+      "id": "2c2fa2d4-f941-417f-aa6d-29aeee9898ba",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bsx3evMTlNzmr0D4",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "record_manager",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "google_drive_file_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.file_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -976
+      ],
+      "id": "b299ff85-9186-4f77-817c-fba50a0e40c1",
+      "name": "Search Record Manager",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents",
+        "filterType": "string",
+        "filterString": "=metadata->>file_id=like.*{{ $('Loop Over Items').item.json.id }}*"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -864
+      ],
+      "id": "215bcb4b-354e-4f21-a469-2f4685ce09ba",
+      "name": "Delete previous vectors",
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "record_manager",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "google_drive_file_id",
+              "fieldValue": "={{ $('Crypto').item.json.file_id }}"
+            },
+            {
+              "fieldId": "hash",
+              "fieldValue": "={{ $('Crypto').item.json.hash }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -1056
+      ],
+      "id": "acb96732-b24b-404a-9ee6-fa0eb55f1827",
+      "name": "Create a row in vector manager",
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "record_manager",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Search Record Manager').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "hash",
+              "fieldValue": "={{ $('Crypto').item.json.hash }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -864
+      ],
+      "id": "19250123-4dcb-4c02-b732-e566a3a57974",
+      "name": "Update our record manager",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "iK6gTwc09ZUBBvrq",
+          "name": "Supabase account RAG N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -864
+      ],
+      "id": "97a12ff7-993f-4d0c-b381-a00bfe64b297",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Filename\n{{ $('Edit Fields1').item.json.filename }}\n\n# File contents\n{{ $json.text.split(/\\s+/).length > 500\n? $json.text.split(/\\s+/).slice(0,500).join(' ') + '...'\n: $json.texxt\n}}\n\n\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Based on the provide filename and file contents, extract out a 1 sentence description of what the document is along with is about and classify the document based on motorsport category..\n\nOnly output JSON in the following format:\n{\n\"motorsport_category\": \"<ADD>\",\n\"document_summary\":\"<ADD>\"\n}\n\n\nIf you are unsure of either of these, just output N/A in the field.\n\nAllowable values for motorsport_category include:\n* F1\n* Rally\n* World endurance\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1616,
+        -1056
+      ],
+      "id": "446b1ce9-e878-436a-a294-6753047a1c71",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"motorsport_category\": \"<ADD>\",\n  \"document_summary\": \"<ADD>\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        -848
+      ],
+      "id": "d7f3707b-58c2-4036-8c15-db1fa7968ecb",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        -848
+      ],
+      "id": "7d2fadd5-2184-4c9f-8d10-d9b0d127a530",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1df1fee6-e60d-49e6-b238-201fb9a63d0e",
+              "name": "content",
+              "value": "={{ $('Extract from File').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "2c6f2e64-26a1-4f0b-83ff-1fbaf95eb38d",
+              "name": "motorsport_category",
+              "value": "={{ $json.output.motorsport_category }}",
+              "type": "string"
+            },
+            {
+              "id": "8368882e-50ec-4ea4-8471-7eda26705042",
+              "name": "document_summary",
+              "value": "={{ $json.output.document_summary }}",
+              "type": "string"
+            },
+            {
+              "id": "a2fae5db-0fb6-44b2-a92e-ab479ec93dfb",
+              "name": "file_id",
+              "value": "={{ $('Download file1').item.json.google_drive_file_id }}",
+              "type": "string"
+            },
+            {
+              "id": "288aeec3-1a14-4f5b-b0e0-294f42dba67c",
+              "name": "filename",
+              "value": "={{ $('Edit Fields1').item.json.filename }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2080,
+        -928
+      ],
+      "id": "0855c14c-c2f0-4b30-8288-c879b67a75f8",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        -816
+      ],
+      "id": "e62d2517-c3ba-4263-9ce5-df2aa19617d6",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Based on the content reply with either F1 or World Endurance.\n\nOnly output in JSON "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        224,
+        -544
+      ],
+      "id": "e04ef65b-e73a-428a-bce2-643091d09be2",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        -336
+      ],
+      "id": "2fe1a789-a8c2-480a-9f34-94dd26287b11",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "fjM4x9d8jZBSLCTb",
+          "name": "OpenAi account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"motorsport_category\": \"<ADD>\"\t\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        -336
+      ],
+      "id": "f0733ced-9002-4347-87db-31b1ecf22655",
+      "name": "Structured Output Parser1"
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "parents": [
+            "1ymFSkROykqqVCLQJCJ2tZfgTFuyM2o1-"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Ernesto Crespo",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "07885033386532503185",
+            "emailAddress": "ecrespo@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKZEo1YrHhXYgurqGw86lsdNZq_7pJlOp5UW6zmmSp4jBs6dYO9dw=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Ernesto Crespo",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "07885033386532503185",
+              "emailAddress": "ecrespo@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKZEo1YrHhXYgurqGw86lsdNZq_7pJlOp5UW6zmmSp4jBs6dYO9dw=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "anyoneWithLink",
+              "type": "anyone",
+              "role": "reader",
+              "allowFileDiscovery": false
+            },
+            {
+              "kind": "drive#permission",
+              "id": "07885033386532503185",
+              "type": "user",
+              "emailAddress": "ecrespo@gmail.com",
+              "role": "owner",
+              "displayName": "Ernesto Crespo",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKZEo1YrHhXYgurqGw86lsdNZq_7pJlOp5UW6zmmSp4jBs6dYO9dw=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "anyoneWithLink",
+            "07885033386532503185"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1l5dvkH9WUfpaJc6iF-fYhZ1tXfxuGA36",
+          "name": "FIA 2025 Formula 1 Sporting Regulations - Issue 5 - 2025-04-30.pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "1",
+          "webContentLink": "https://drive.google.com/uc?id=1l5dvkH9WUfpaJc6iF-fYhZ1tXfxuGA36&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1l5dvkH9WUfpaJc6iF-fYhZ1tXfxuGA36/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": false,
+          "thumbnailVersion": "0",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-07-24T19:41:23.266Z",
+          "createdTime": "2025-07-24T19:41:23.266Z",
+          "modifiedTime": "2025-07-24T15:15:25.000Z",
+          "modifiedByMeTime": "2025-07-24T15:15:25.000Z",
+          "modifiedByMe": true,
+          "shared": true,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "FIA 2025 Formula 1 Sporting Regulations - Issue 5 - 2025-04-30.pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "2b15b07c5279c9a71c7b4bb2276d353d",
+          "sha1Checksum": "56ae872ce8fb415c26c3bcb5cb4fafe764dbfb6f",
+          "sha256Checksum": "525eef22a60f0755a4468281dd7c78c5ea5bd0eec38dc1b09cc31a0c0132854e",
+          "size": "1294826",
+          "quotaBytesUsed": "1294826",
+          "headRevisionId": "0B1r1NLOE_fGKeVFab1FuQWcyNjRDRytVSVBOWGl0ZHVqVCs4PQ",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "f1_knowledgebase",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "f1_knowledgebase": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Search Record Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Create a row in vector manager",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete previous vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Record Manager": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete previous vectors": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row in vector manager": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update our record manager": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Update our record manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fc23bca7-e3af-4b27-a0d9-648f3de0fddc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db3ed06fb1d71d8f93caf7da2791fd0ccc658304ef74e111008e32fa0efba548"
+  },
+  "id": "qUjNheMT1CNAZZd1",
+  "tags": [
+    {
+      "createdAt": "2025-07-24T18:09:12.455Z",
+      "updatedAt": "2025-07-24T18:09:12.455Z",
+      "id": "lfDC6vu8rgzvsFXK",
+      "name": "RAG"
+    }
+  ]
+}
